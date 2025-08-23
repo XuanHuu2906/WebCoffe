@@ -674,7 +674,7 @@ const Cart = () => {
         } : null
       };
 
-      const response = await fetch('http://localhost:5003/api/orders', {
+      const response = await fetch('http://localhost:5004/api/orders', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

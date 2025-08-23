@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <defs>
+    <radialGradient id="glassGradient" cx="30%" cy="20%" r="80%">
+      <stop offset="0%" style="stop-color:#F0F8FF;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#E6F3FF;stop-opacity:0.9" />
+    </radialGradient>
+    <radialGradient id="icedCoffeeGradient" cx="50%" cy="20%" r="80%">
+      <stop offset="0%" style="stop-color:#8B4513;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+    </radialGradient>
+    <radialGradient id="iceGradient" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#FFFFFF;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#E0F7FA;stop-opacity:0.7" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="300" height="300" fill="#E3F2FD"/>
+  
+  <!-- Glass shadow -->
+  <ellipse cx="150" cy="250" rx="60" ry="12" fill="#1976D2" opacity="0.2"/>
+  
+  <!-- Glass -->
+  <path d="M 90 120 L 90 220 Q 90 240 110 240 L 190 240 Q 210 240 210 220 L 210 120 Q 210 100 190 100 L 110 100 Q 90 100 90 120 Z" fill="url(#glassGradient)" stroke="#81D4FA" stroke-width="3"/>
+  
+  <!-- Iced coffee -->
+  <rect x="95" y="140" width="110" height="95" fill="url(#icedCoffeeGradient)" rx="5"/>
+  
+  <!-- Ice cubes -->
+  <rect x="105" y="130" width="15" height="15" fill="url(#iceGradient)" stroke="#B3E5FC" stroke-width="1" rx="2"/>
+  <rect x="125" y="145" width="12" height="12" fill="url(#iceGradient)" stroke="#B3E5FC" stroke-width="1" rx="2"/>
+  <rect x="170" y="135" width="14" height="14" fill="url(#iceGradient)" stroke="#B3E5FC" stroke-width="1" rx="2"/>
+  <rect x="155" y="155" width="13" height="13" fill="url(#iceGradient)" stroke="#B3E5FC" stroke-width="1" rx="2"/>
+  <rect x="180" y="160" width="15" height="15" fill="url(#iceGradient)" stroke="#B3E5FC" stroke-width="1" rx="2"/>
+  <rect x="110" y="180" width="12" height="12" fill="url(#iceGradient)" stroke="#B3E5FC" stroke-width="1" rx="2"/>
+  <rect x="175" y="185" width="14" height="14" fill="url(#iceGradient)" stroke="#B3E5FC" stroke-width="1" rx="2"/>
+  
+  <!-- Ice cube highlights -->
+  <rect x="107" y="132" width="4" height="4" fill="#FFFFFF" opacity="0.8" rx="1"/>
+  <rect x="172" y="137" width="3" height="3" fill="#FFFFFF" opacity="0.8" rx="1"/>
+  <rect x="157" y="157" width="3" height="3" fill="#FFFFFF" opacity="0.8" rx="1"/>
+  
+  <!-- Straw -->
+  <rect x="175" y="80" width="6" height="160" fill="#FF5722" rx="3"/>
+  <rect x="176" y="82" width="4" height="156" fill="#FF7043" rx="2"/>
+  
+  <!-- Straw bend -->
+  <path d="M 178 80 Q 185 75 190 70 Q 195 65 200 70 L 205 75" fill="none" stroke="#FF5722" stroke-width="6" stroke-linecap="round"/>
+  <path d="M 178 82 Q 185 77 190 72 Q 195 67 200 72 L 203 75" fill="none" stroke="#FF7043" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Glass rim highlight -->
+  <ellipse cx="150" cy="100" rx="60" ry="8" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.6"/>
+  
+  <!-- Condensation drops -->
+  <circle cx="100" cy="160" r="2" fill="#81D4FA" opacity="0.6"/>
+  <circle cx="195" cy="180" r="1.5" fill="#81D4FA" opacity="0.6"/>
+  <circle cx="110" cy="200" r="1" fill="#81D4FA" opacity="0.6"/>
+  <circle cx="185" cy="210" r="1.8" fill="#81D4FA" opacity="0.6"/>
+  
+  <!-- Title -->
+  <text x="150" y="280" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#1976D2">Iced Coffee</text>
+</svg>

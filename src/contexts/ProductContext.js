@@ -98,7 +98,7 @@ export const ProductProvider = ({ children }) => {
   const [state, dispatch] = useReducer(productReducer, initialState);
 
   // Base API URL
-  const API_BASE_URL = 'http://localhost:5003/api';
+  const API_BASE_URL = 'http://localhost:5004/api';
 
   // Fetch products with filters
   const fetchProducts = useCallback(async (filters = {}) => {

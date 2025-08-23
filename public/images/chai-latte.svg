@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300">
+  <defs>
+    <radialGradient id="cupGradient" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#D7CCC8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A1887F;stop-opacity:1" />
+    </radialGradient>
+    <radialGradient id="chaiGradient" cx="50%" cy="20%" r="80%">
+      <stop offset="0%" style="stop-color:#D2691E;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A0522D;stop-opacity:1" />
+    </radialGradient>
+    <radialGradient id="foamGradient" cx="50%" cy="20%" r="80%">
+      <stop offset="0%" style="stop-color:#FFFAF0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F5DEB3;stop-opacity:1" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="300" height="300" fill="#FFF3E0"/>
+  
+  <!-- Cup shadow -->
+  <ellipse cx="150" cy="250" rx="80" ry="15" fill="#A1887F" opacity="0.3"/>
+  
+  <!-- Cup -->
+  <path d="M 80 120 Q 80 100 100 100 L 200 100 Q 220 100 220 120 L 210 220 Q 210 240 190 240 L 110 240 Q 90 240 90 220 Z" fill="url(#cupGradient)" stroke="#8D6E63" stroke-width="2"/>
+  
+  <!-- Chai latte -->
+  <ellipse cx="150" cy="125" rx="65" ry="18" fill="url(#chaiGradient)"/>
+  
+  <!-- Milk foam -->
+  <ellipse cx="150" cy="115" rx="60" ry="12" fill="url(#foamGradient)"/>
+  
+  <!-- Cinnamon powder dusting -->
+  <circle cx="140" cy="110" r="1" fill="#8B4513" opacity="0.7"/>
+  <circle cx="160" cy="112" r="0.8" fill="#8B4513" opacity="0.7"/>
+  <circle cx="150" cy="108" r="1.2" fill="#8B4513" opacity="0.7"/>
+  <circle cx="155" cy="115" r="0.6" fill="#8B4513" opacity="0.7"/>
+  <circle cx="145" cy="118" r="0.9" fill="#8B4513" opacity="0.7"/>
+  
+  <!-- Spice pattern -->
+  <path d="M 135 113 Q 140 108 145 113" fill="none" stroke="#D2691E" stroke-width="1" opacity="0.6"/>
+  <path d="M 155 110 Q 160 115 165 110" fill="none" stroke="#D2691E" stroke-width="1" opacity="0.6"/>
+  
+  <!-- Handle -->
+  <path d="M 220 140 Q 250 140 250 170 Q 250 200 220 200" fill="none" stroke="#8D6E63" stroke-width="8" stroke-linecap="round"/>
+  
+  <!-- Steam with spice aroma -->
+  <path d="M 130 90 Q 125 70 130 50 Q 135 30 130 10" fill="none" stroke="#FFE0B2" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <path d="M 150 90 Q 155 70 150 50 Q 145 30 150 10" fill="none" stroke="#FFE0B2" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  <path d="M 170 90 Q 175 70 170 50 Q 165 30 170 10" fill="none" stroke="#FFE0B2" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+  
+  <!-- Decorative spice elements -->
+  <ellipse cx="120" cy="200" rx="2" ry="1" fill="#8B4513" opacity="0.4" transform="rotate(30 120 200)"/>
+  <ellipse cx="180" cy="195" rx="1.5" ry="0.8" fill="#8B4513" opacity="0.4" transform="rotate(-20 180 195)"/>
+  
+  <!-- Title -->
+  <text x="150" y="280" font-family="Arial, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#8D6E63">Chai Latte</text>
+</svg>

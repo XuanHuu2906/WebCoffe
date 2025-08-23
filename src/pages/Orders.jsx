@@ -38,54 +38,7 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showOrderDialog, setShowOrderDialog] = useState(false);
 
-  // Mock orders data - in real app, this would come from API
-  const mockOrders = [
-    {
-      id: 'ORD-001',
-      date: '2024-01-15',
-      status: 'delivered',
-      total: 24.50,
-      items: [
-        { name: 'Espresso', size: 'Medium', quantity: 2, price: 4.50 },
-        { name: 'Croissant', quantity: 1, price: 3.50 },
-        { name: 'Cappuccino', size: 'Large', quantity: 1, price: 5.50 }
-      ],
-      notes: 'Extra hot please'
-    },
-    {
-      id: 'ORD-002',
-      date: '2024-01-12',
-      status: 'processing',
-      total: 18.75,
-      items: [
-        { name: 'Latte', size: 'Large', quantity: 1, price: 5.25 },
-        { name: 'Blueberry Muffin', quantity: 2, price: 4.25 }
-      ],
-      notes: ''
-    },
-    {
-      id: 'ORD-003',
-      date: '2024-01-10',
-      status: 'cancelled',
-      total: 12.00,
-      items: [
-        { name: 'Americano', size: 'Medium', quantity: 2, price: 3.75 }
-      ],
-      notes: 'Customer requested cancellation'
-    },
-    {
-      id: 'ORD-004',
-      date: '2024-01-08',
-      status: 'delivered',
-      total: 31.25,
-      items: [
-        { name: 'Mocha', size: 'Large', quantity: 2, price: 6.50 },
-        { name: 'Chocolate Cake', quantity: 1, price: 8.75 },
-        { name: 'Green Tea', size: 'Medium', quantity: 1, price: 3.25 }
-      ],
-      notes: 'Birthday celebration order'
-    }
-  ];
+  // Orders will be fetched from API
 
   useEffect(() => {
     // Fetch orders from API
@@ -98,7 +51,7 @@ const Orders = () => {
           throw new Error('Authentication required. Please log in.');
         }
 
-        const response = await fetch('http://localhost:5003/api/orders', {
+        const response = await fetch('http://localhost:5004/api/orders', {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -214,19 +167,52 @@ const Orders = () => {
                 setLoading(true);
                 setError(null);
                 try {
-                  await new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                      if (Math.random() > 0.9) {
-                        reject(new Error('Failed to load orders. Please check your connection.'));
-                      } else {
-                        resolve();
-                      }
-                    }, 1000);
+                  const token = localStorage.getItem('token');
+                  if (!token) {
+                    throw new Error('Authentication required. Please log in.');
+                  }
+
+                  const response = await fetch('http://localhost:5004/api/orders', {
+                    method: 'GET',
+                    headers: {
+                      'Authorization': `Bearer ${token}`,
+                      'Content-Type': 'application/json'
+                    }
                   });
-                  setOrders(mockOrders);
+
+                  if (!response.ok) {
+                    if (response.status === 401) {
+                      throw new Error('Session expired. Please log in again.');
+                    }
+                    throw new Error('Failed to load orders. Please try again.');
+                  }
+
+                  const data = await response.json();
+                  if (data.success) {
+                    const mappedOrders = data.data.map(order => ({
+                      id: order.orderNumber,
+                      date: new Date(order.createdAt).toISOString().split('T')[0],
+                      status: order.status === 'completed' ? 'delivered' : 
+                             order.status === 'preparing' || order.status === 'confirmed' ? 'processing' : 
+                             order.status,
+                      total: order.total,
+                      items: order.items.map(item => ({
+                        name: item.name,
+                        size: item.size !== 'Regular' ? item.size : undefined,
+                        quantity: item.quantity,
+                        price: item.price
+                      }))
+                    }));
+                    setOrders(mappedOrders);
+                  } else {
+                    throw new Error(data.message || 'Failed to load orders');
+                  }
                 } catch (error) {
                   console.error('Failed to fetch orders:', error);
                   setError(error.message || 'Failed to load orders. Please try again.');
+                  if (error.message.includes('Authentication required')) {
+                    setOrders([]);
+                  }
                 } finally {
                   setLoading(false);
                 }

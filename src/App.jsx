@@ -9,6 +9,8 @@ import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
 import Menu from './pages/Menu.jsx';
 import Cart from './pages/Cart.jsx';
+import Profile from './pages/Profile.jsx';
+import Orders from './pages/Orders.jsx';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import ProtectedRoute from './components/auth/ProtectedRoute';
@@ -57,12 +59,12 @@ function App() {
                       } />
                       <Route path="/profile" element={
                         <ProtectedRoute>
-                          <div>Profile Page - Coming Soon</div>
+                          <Profile />
                         </ProtectedRoute>
                       } />
                       <Route path="/orders" element={
                         <ProtectedRoute>
-                          <div>Order History - Coming Soon</div>
+                          <Orders />
                         </ProtectedRoute>
                       } />
                       <Route path="/admin" element={

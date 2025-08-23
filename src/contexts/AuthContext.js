@@ -117,7 +117,7 @@ export const AuthProvider = ({ children }) => {
       const token = localStorage.getItem('token');
       if (token) {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        const res = await axios.get('http://localhost:5003/api/auth/me');
+        const res = await axios.get('http://localhost:5004/api/auth/me');
         
         dispatch({
           type: 'LOGIN_SUCCESS',
@@ -138,7 +138,7 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: 'LOGIN_START' });
       
-      const res = await axios.post('http://localhost:5003/api/auth/login', {
+      const res = await axios.post('http://localhost:5004/api/auth/login', {
         email,
         password
       });
@@ -167,7 +167,7 @@ export const AuthProvider = ({ children }) => {
     try {
       dispatch({ type: 'REGISTER_START' });
       
-      const res = await axios.post('http://localhost:5003/api/auth/register', userData);
+      const res = await axios.post('http://localhost:5004/api/auth/register', userData);
 
       dispatch({
         type: 'REGISTER_SUCCESS',
@@ -196,7 +196,7 @@ export const AuthProvider = ({ children }) => {
   // Update user profile
   const updateProfile = async (userData) => {
     try {
-      const res = await axios.put('http://localhost:5003/api/auth/profile', userData);
+      const res = await axios.put('http://localhost:5004/api/auth/profile', userData);
       
       dispatch({
         type: 'UPDATE_USER',
@@ -213,7 +213,7 @@ export const AuthProvider = ({ children }) => {
   // Change password
   const changePassword = async (currentPassword, newPassword) => {
     try {
-      const res = await axios.put('http://localhost:5003/api/auth/change-password', {
+      const res = await axios.put('http://localhost:5004/api/auth/password', {
         currentPassword,
         newPassword
       });

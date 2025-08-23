@@ -46,7 +46,18 @@ const Profile = () => {
     firstName: '',
     lastName: '',
     email: '',
-    phone: ''
+    phone: '',
+    address: {
+      street: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: 'USA'
+    },
+    preferences: {
+      newsletter: false,
+      notifications: true
+    }
   });
   
   const [passwordData, setPasswordData] = useState({
@@ -73,6 +84,17 @@ const Profile = () => {
       case 'phone':
         if (value && !/^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/[\s\-\(\)]/g, ''))) {
           return 'Please enter a valid phone number';
+        }
+        return '';
+      case 'street':
+        return '';
+      case 'city':
+        return '';
+      case 'state':
+        return '';
+      case 'zipCode':
+        if (value && !/^\d{5}(-\d{4})?$/.test(value)) {
+          return 'Please enter a valid ZIP code (e.g., 12345 or 12345-6789)';
         }
         return '';
       default:
@@ -148,19 +170,53 @@ const Profile = () => {
         firstName: user.firstName || '',
         lastName: user.lastName || '',
         email: user.email || '',
-        phone: user.phone || ''
+        phone: user.phone || '',
+        address: {
+          street: user.address?.street || '',
+          city: user.address?.city || '',
+          state: user.address?.state || '',
+          zipCode: user.address?.zipCode || '',
+          country: user.address?.country || 'USA'
+        },
+        preferences: {
+          newsletter: user.preferences?.newsletter || false,
+          notifications: user.preferences?.notifications !== undefined ? user.preferences.notifications : true
+        }
       });
     }
   }, [user]);
 
   // Handle profile form changes
   const handleProfileChange = (event) => {
-    const { name, value } = event.target;
-    setProfileData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    setProfileTouched(prev => ({ ...prev, [name]: true }));
+    const { name, value, type, checked } = event.target;
+    const actualValue = type === 'checkbox' ? checked : value;
+    
+    if (name.startsWith('address.')) {
+      const addressField = name.split('.')[1];
+      setProfileData(prev => ({
+        ...prev,
+        address: {
+          ...prev.address,
+          [addressField]: actualValue
+        }
+      }));
+      setProfileTouched(prev => ({ ...prev, [addressField]: true }));
+    } else if (name.startsWith('preferences.')) {
+      const prefField = name.split('.')[1];
+      setProfileData(prev => ({
+        ...prev,
+        preferences: {
+          ...prev.preferences,
+          [prefField]: actualValue
+        }
+      }));
+    } else {
+      setProfileData(prev => ({
+        ...prev,
+        [name]: actualValue
+      }));
+      setProfileTouched(prev => ({ ...prev, [name]: true }));
+    }
   };
 
   const handleProfileBlur = (event) => {
@@ -427,6 +483,133 @@ const Profile = () => {
                 />
               </Grid>
             </Grid>
+
+            <Divider sx={{ my: 3 }} />
+
+            {/* Address Section */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+                Address Information
+              </Typography>
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Street Address"
+                    name="address.street"
+                    value={profileData.address.street}
+                    onChange={handleProfileChange}
+                    onBlur={handleProfileBlur}
+                    disabled={!isEditing || loading}
+                    variant="outlined"
+                    error={isEditing && profileTouched.street && !!profileErrors.street}
+                    helperText={isEditing && profileTouched.street && profileErrors.street}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="City"
+                    name="address.city"
+                    value={profileData.address.city}
+                    onChange={handleProfileChange}
+                    onBlur={handleProfileBlur}
+                    disabled={!isEditing || loading}
+                    variant="outlined"
+                    error={isEditing && profileTouched.city && !!profileErrors.city}
+                    helperText={isEditing && profileTouched.city && profileErrors.city}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    label="State"
+                    name="address.state"
+                    value={profileData.address.state}
+                    onChange={handleProfileChange}
+                    onBlur={handleProfileBlur}
+                    disabled={!isEditing || loading}
+                    variant="outlined"
+                    error={isEditing && profileTouched.state && !!profileErrors.state}
+                    helperText={isEditing && profileTouched.state && profileErrors.state}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={3}>
+                  <TextField
+                    fullWidth
+                    label="ZIP Code"
+                    name="address.zipCode"
+                    value={profileData.address.zipCode}
+                    onChange={handleProfileChange}
+                    onBlur={handleProfileBlur}
+                    disabled={!isEditing || loading}
+                    variant="outlined"
+                    error={isEditing && profileTouched.zipCode && !!profileErrors.zipCode}
+                    helperText={isEditing && profileTouched.zipCode && profileErrors.zipCode}
+                  />
+                </Grid>
+              </Grid>
+            </Box>
+
+            {/* Loyalty Points Section */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+                Loyalty Program
+              </Typography>
+              <Paper sx={{ p: 2, backgroundColor: '#f5f5f5' }}>
+                <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#8B4513' }}>
+                  {user.loyaltyPoints || 0} Points
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Earn points with every purchase and redeem for rewards!
+                </Typography>
+              </Paper>
+            </Box>
+
+            {/* Preferences Section */}
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
+                Preferences
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <input
+                      type="checkbox"
+                      id="newsletter"
+                      name="preferences.newsletter"
+                      checked={profileData.preferences.newsletter}
+                      onChange={handleProfileChange}
+                      disabled={!isEditing || loading}
+                      style={{ marginRight: '8px' }}
+                    />
+                    <label htmlFor="newsletter">
+                      <Typography variant="body1">
+                        Subscribe to newsletter for updates and special offers
+                      </Typography>
+                    </label>
+                  </Box>
+                </Grid>
+                <Grid item xs={12}>
+                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                    <input
+                      type="checkbox"
+                      id="notifications"
+                      name="preferences.notifications"
+                      checked={profileData.preferences.notifications}
+                      onChange={handleProfileChange}
+                      disabled={!isEditing || loading}
+                      style={{ marginRight: '8px' }}
+                    />
+                    <label htmlFor="notifications">
+                      <Typography variant="body1">
+                        Receive order status notifications
+                      </Typography>
+                    </label>
+                  </Box>
+                </Grid>
+              </Grid>
+            </Box>
 
             <Divider sx={{ my: 4 }} />
 
