@@ -12,7 +12,7 @@ import {
   IconButton
 } from '@mui/material';
 import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 
 const Login = () => {

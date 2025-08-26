@@ -20,8 +20,8 @@ import {
   InputLabel
 } from '@mui/material';
 import { Search, Add, Remove } from '@mui/icons-material';
-import { useProducts } from '../contexts/ProductContext';
-import { useCart } from '../contexts/CartContext';
+import { useProducts } from '../contexts/ProductContext.jsx';
+import { useCart } from '../contexts/CartContext.jsx';
 
 const Menu = () => {
   const [searchTerm, setSearchTerm] = useState('');

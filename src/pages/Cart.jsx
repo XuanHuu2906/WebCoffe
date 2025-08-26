@@ -49,8 +49,8 @@ import {
   Person
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../contexts/CartContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useCart } from '../contexts/CartContext.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -674,7 +674,7 @@ const Cart = () => {
         } : null
       };
 
-      const response = await fetch('http://localhost:5004/api/orders', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

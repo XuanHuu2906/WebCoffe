@@ -48,8 +48,8 @@ import {
   Cancel,
   Search
 } from '@mui/icons-material';
-import { useProducts } from '../contexts/ProductContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useProducts } from '../contexts/ProductContext.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const Admin = () => {
   const { user } = useAuth();

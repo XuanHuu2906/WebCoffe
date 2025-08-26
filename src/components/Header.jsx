@@ -22,8 +22,8 @@ import {
   AdminPanelSettings
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import { useCart } from '../contexts/CartContext.jsx';
 
 const Header = () => {
   const navigate = useNavigate();

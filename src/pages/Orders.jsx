@@ -28,7 +28,7 @@ import {
   Schedule,
   Cancel
 } from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const Orders = () => {
   const { user } = useAuth();
@@ -51,7 +51,7 @@ const Orders = () => {
           throw new Error('Authentication required. Please log in.');
         }
 
-        const response = await fetch('http://localhost:5004/api/orders', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -172,7 +172,7 @@ const Orders = () => {
                     throw new Error('Authentication required. Please log in.');
                   }
 
-                  const response = await fetch('http://localhost:5004/api/orders', {
+                  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
                     method: 'GET',
                     headers: {
                       'Authorization': `Bearer ${token}`,

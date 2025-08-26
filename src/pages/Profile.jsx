@@ -27,7 +27,7 @@ import {
   VisibilityOff,
   Lock
 } from '@mui/icons-material';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext.jsx';
 
 const Profile = () => {
   const { user, updateProfile, changePassword, loading } = useAuth();

@@ -1,45 +1,44 @@
 {
-  "name": "frontend",
-  "version": "0.1.0",
+  "name": "webcaffe-frontend",
   "private": true,
-  "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^7.3.1",
-    "@mui/material": "^7.3.1",
-    "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0",
-    "@testing-library/user-event": "^13.2.1",
-    "axios": "^1.11.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "react-router-dom": "^7.8.2",
-    "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.0"
+  "version": "1.0.0",
+  "type": "module",
+  "author": "WebCaffe Team",
+  "description": "Frontend application for WebCaffe - A modern coffee shop management system",
+  "engines": {
+    "node": ">=18.x"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "cross-env BUILD_MODE=dev vite --host",
+    "build": "cross-env BUILD_MODE=production vite build --base=./",
+    "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
+    "preview": "vite preview"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
+  "dependencies": {
+    "@dnd-kit/core": "^6.0.8",
+    "@dnd-kit/sortable": "^7.0.2",
+    "@dnd-kit/utilities": "^3.2.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.17.1",
+    "axios": "^1.5.1",
+    "cross-env": "^7.0.3",
+    "lodash": "^4.17.21",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.1.1",
+    "react-toastify": "^9.1.3"
   },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "devDependencies": {
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "@vitejs/plugin-react-swc": "^3.0.0",
+    "eslint": "^8.47.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "vite": "^4.3.2",
+    "vite-plugin-svgr": "^3.2.0"
   }
 }
