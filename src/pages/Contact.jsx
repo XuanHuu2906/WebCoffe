@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 // Removed react-helmet-async due to dependency conflicts
+import MapEmbed from '../components/MapEmbed';
 import {
   Box,
   Container,
@@ -35,7 +36,7 @@ import {
   LocationOn,
   Schedule,
   Chat,
-  Directions,
+
   Search,
   Send,
   AttachFile,
@@ -117,7 +118,7 @@ const Contact = () => {
     {
       id: 1,
       name: 'Main Store',
-      address: '123 Coffee Street, Downtown District, Ho Chi Minh City 70000',
+      address: '97 Man Thiện, Hiệp Phú, Thủ Đức, Hồ Chí Minh',
       phone: '+84 28 1234 5678',
       hours: {
         'Monday': '6:00 AM - 8:00 PM',
@@ -129,7 +130,6 @@ const Contact = () => {
         'Sunday': '7:00 AM - 7:00 PM'
       },
       amenities: ['parking', 'wifi', 'outlets', 'pet-friendly', 'accessible'],
-      mapUrl: 'https://maps.google.com/embed?pb=!1m18!1m12!1m3!1d3919.4!2d106.7!3d10.8!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTDCsDQ4JzAwLjAiTiAxMDbCsDQyJzAwLjAiRQ!5e0!3m2!1sen!2s!4v1234567890'
     }
   ];
 
@@ -671,15 +671,7 @@ const Contact = () => {
             >
               WhatsApp
             </Button>
-            <Button
-              startIcon={<Directions />}
-              href="https://maps.google.com/directions"
-              target="_blank"
-              sx={{ color: 'white', textTransform: 'none' }}
-              size="small"
-            >
-              Get Directions
-            </Button>
+
             <Button
               startIcon={<Search />}
               onClick={() => setTrackOrderDialog(true)}
@@ -858,6 +850,7 @@ const Contact = () => {
                     border: '1px solid rgba(255,255,255,0.3)'
                   }
                 }}
+                onClick={() => window.open('https://www.google.com/maps/dir/?api=1&destination=10.847987,106.7860196', '_blank')}
               >
                 <LocationOn sx={{ fontSize: '3rem', mb: 2, color: '#F4A460' }} />
                 <Typography variant="h6" sx={{ color: 'white', fontWeight: 600, mb: 1 }}>
@@ -1012,20 +1005,7 @@ const Contact = () => {
                             >
                               Call Now
                             </Button>
-                            <Button 
-                              variant="outlined" 
-                              startIcon={<Directions />} 
-                              sx={{ 
-                                borderColor: '#8B4513',
-                                color: '#8B4513',
-                                borderRadius: 2,
-                                '&:hover': { borderColor: '#A0522D', bgcolor: '#f5f5f5' }
-                              }}
-                              href={`https://maps.google.com/directions?daddr=${encodeURIComponent(location.address)}`}
-                              target="_blank"
-                            >
-                              Directions
-                            </Button>
+
                             <Button 
                               variant="text" 
                               sx={{ 
@@ -1132,47 +1112,7 @@ const Contact = () => {
                       </Box>
                       
                       <Box sx={{ position: 'relative' }}>
-                        <Box 
-                          sx={{ 
-                            width: '100%', 
-                            height: 350,
-                            background: 'linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexDirection: 'column',
-                            border: '2px dashed #ccc'
-                          }}
-                        >
-                          <LocationOn sx={{ fontSize: 48, color: '#8B4513', mb: 2 }} />
-                          <Typography variant="h6" sx={{ color: '#8B4513', mb: 1 }}>
-                            Interactive Map
-                          </Typography>
-                          <Typography variant="body2" sx={{ color: '#666', textAlign: 'center', px: 2 }}>
-                            Click the button below to view our location on Google Maps
-                          </Typography>
-                        </Box>
-                      </Box>
-                      
-                      <Box sx={{ p: 2 }}>
-                        <Button 
-                          variant="contained" 
-                          fullWidth 
-                          size="large"
-                          startIcon={<Directions />}
-                          sx={{ 
-                            bgcolor: '#8B4513',
-                            '&:hover': { bgcolor: '#A0522D' },
-                            borderRadius: 2,
-                            py: 1.5,
-                            fontSize: '1.1rem',
-                            fontWeight: 'bold'
-                          }}
-                          href="https://maps.google.com/?q=123+Coffee+Street+Ho+Chi+Minh+City"
-                          target="_blank"
-                        >
-                          Open in Google Maps
-                        </Button>
+                        <MapEmbed />
                       </Box>
                     </Card>
                   </Box>

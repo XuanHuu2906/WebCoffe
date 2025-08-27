@@ -18,7 +18,8 @@ const Layout = ({ children }) => {
         sx={{
           flexGrow: 1,
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          paddingTop: '64px' // Add padding to account for fixed header
         }}
       >
         {children}
