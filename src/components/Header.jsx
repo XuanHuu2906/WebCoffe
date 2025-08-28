@@ -11,7 +11,14 @@ import {
   MenuItem,
   Avatar,
   Divider,
-  ListItemIcon
+  ListItemIcon,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  useMediaQuery,
+  useTheme
 } from '@mui/material';
 import {
   ShoppingCart,
@@ -19,7 +26,9 @@ import {
   Logout,
   Person,
   History,
-  AdminPanelSettings
+  AdminPanelSettings,
+  Menu as MenuIcon,
+  Close
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -30,6 +39,9 @@ const Header = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const { itemCount } = useCart();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleUserMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -48,6 +60,14 @@ const Header = () => {
   const handleMenuItemClick = (path) => {
     navigate(path);
     handleUserMenuClose();
+  };
+
+  const handleCartClick = () => {
+    if (!isAuthenticated) {
+      navigate('/login');
+    } else {
+      navigate('/cart');
+    }
   };
 
   return (
@@ -73,12 +93,17 @@ const Header = () => {
         <Typography
           variant="h6"
           component="div"
-          sx={{ flexGrow: 1, fontWeight: 'bold' }}
+          sx={{ 
+            flexGrow: 1, 
+            fontWeight: 'bold',
+            fontSize: { xs: '1.1rem', sm: '1.25rem' }
+          }}
         >
           WebCaffe
         </Typography>
         
-        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+        {/* Desktop Navigation */}
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 2, alignItems: 'center' }}>
           <Button
             color="inherit"
             component={Link}
@@ -114,8 +139,7 @@ const Header = () => {
           
           <IconButton
             color="inherit"
-            component={Link}
-            to="/cart"
+            onClick={handleCartClick}
             aria-label="shopping cart"
           >
             <Badge badgeContent={itemCount} color="error">
@@ -129,6 +153,7 @@ const Header = () => {
                 color="inherit"
                 onClick={handleUserMenuOpen}
                 aria-label="user menu"
+                sx={{ display: { xs: 'none', md: 'flex' } }}
               >
                 <Avatar
                   sx={{ width: 32, height: 32, bgcolor: 'secondary.main' }}
@@ -206,7 +231,7 @@ const Header = () => {
                 color="inherit"
                 component={Link}
                 to="/login"
-                sx={{ textTransform: 'none' }}
+                sx={{ textTransform: 'none', display: { xs: 'none', md: 'inline-flex' } }}
               >
                 Login
               </Button>
@@ -218,6 +243,7 @@ const Header = () => {
                 sx={{ 
                   textTransform: 'none',
                   borderColor: 'white',
+                  display: { xs: 'none', md: 'inline-flex' },
                   '&:hover': {
                     borderColor: 'white',
                     backgroundColor: 'rgba(255, 255, 255, 0.1)'
@@ -229,6 +255,101 @@ const Header = () => {
             </>
           )}
         </Box>
+        
+        {/* Mobile Menu Button */}
+        <IconButton
+          color="inherit"
+          onClick={() => setMobileMenuOpen(true)}
+          sx={{ display: { xs: 'flex', md: 'none' } }}
+        >
+          <MenuIcon />
+        </IconButton>
+        
+        {/* Mobile Drawer */}
+        <Drawer
+          anchor="right"
+          open={mobileMenuOpen}
+          onClose={() => setMobileMenuOpen(false)}
+          sx={{ display: { xs: 'block', md: 'none' } }}
+        >
+          <Box sx={{ width: 250, pt: 2 }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 2 }}>
+              <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#8B4513' }}>
+                WebCaffe
+              </Typography>
+              <IconButton onClick={() => setMobileMenuOpen(false)}>
+                <Close />
+              </IconButton>
+            </Box>
+            <Divider />
+            <List>
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/" onClick={() => setMobileMenuOpen(false)}>
+                  <ListItemText primary="Home" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/menu" onClick={() => setMobileMenuOpen(false)}>
+                  <ListItemText primary="Menu" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/about" onClick={() => setMobileMenuOpen(false)}>
+                  <ListItemText primary="About" />
+                </ListItemButton>
+              </ListItem>
+              <ListItem disablePadding>
+                <ListItemButton component={Link} to="/contact" onClick={() => setMobileMenuOpen(false)}>
+                  <ListItemText primary="Contact" />
+                </ListItemButton>
+              </ListItem>
+              <Divider sx={{ my: 1 }} />
+              {isAuthenticated ? (
+                <>
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={() => { handleMenuItemClick('/profile'); setMobileMenuOpen(false); }}>
+                      <ListItemIcon><Person /></ListItemIcon>
+                      <ListItemText primary="Profile" />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={() => { handleMenuItemClick('/orders'); setMobileMenuOpen(false); }}>
+                      <ListItemIcon><History /></ListItemIcon>
+                      <ListItemText primary="Order History" />
+                    </ListItemButton>
+                  </ListItem>
+                  {user?.role === 'admin' && (
+                    <ListItem disablePadding>
+                      <ListItemButton onClick={() => { handleMenuItemClick('/admin'); setMobileMenuOpen(false); }}>
+                        <ListItemIcon><AdminPanelSettings /></ListItemIcon>
+                        <ListItemText primary="Admin Dashboard" />
+                      </ListItemButton>
+                    </ListItem>
+                  )}
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={() => { handleLogout(); setMobileMenuOpen(false); }}>
+                      <ListItemIcon><Logout /></ListItemIcon>
+                      <ListItemText primary="Logout" />
+                    </ListItemButton>
+                  </ListItem>
+                </>
+              ) : (
+                <>
+                  <ListItem disablePadding>
+                    <ListItemButton component={Link} to="/login" onClick={() => setMobileMenuOpen(false)}>
+                      <ListItemText primary="Login" />
+                    </ListItemButton>
+                  </ListItem>
+                  <ListItem disablePadding>
+                    <ListItemButton component={Link} to="/register" onClick={() => setMobileMenuOpen(false)}>
+                      <ListItemText primary="Sign Up" />
+                    </ListItemButton>
+                  </ListItem>
+                </>
+              )}
+            </List>
+          </Box>
+        </Drawer>
       </Toolbar>
     </AppBar>
   );

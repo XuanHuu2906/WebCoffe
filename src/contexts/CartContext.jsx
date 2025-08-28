@@ -408,9 +408,9 @@ export const CartProvider = ({ children }) => {
     const total = getTotalWithTax();
     
     return {
-      subtotal: parseFloat(subtotal.toFixed(2)),
-      tax: parseFloat(tax.toFixed(2)),
-      total: parseFloat(total.toFixed(2)),
+      subtotal: Math.round(subtotal * 100) / 100,
+      tax: Math.round(tax * 100) / 100,
+      total: Math.round(total * 100) / 100,
       itemCount: state.itemCount
     };
   };

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Order API</title>
+</head>
+<body>
+    <h1>Test Order Creation</h1>
+    <button onclick="testOrder()">Test Create Order</button>
+    <div id="result"></div>
+
+    <script>
+        async function testOrder() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                // Get token from localStorage
+                const token = localStorage.getItem('token');
+                console.log('Token:', token ? 'Present' : 'Missing');
+                
+                if (!token) {
+                    resultDiv.innerHTML = 'Error: No token found. Please login first.';
+                    return;
+                }
+                
+                // Test order data
+                const orderData = {
+                    items: [{
+                        product: '68afdc121de2f798c765ff9b', // Cappuccino ID
+                        name: 'Cappuccino',
+                        size: 'Regular',
+                        quantity: 1,
+                        price: 4.50
+                    }],
+                    orderType: 'pickup',
+                    paymentMethod: 'cash',
+                    notes: 'Test order from HTML page',
+                    subtotal: 4.50,
+                    discount: 0,
+                    tax: 0.45,
+                    total: 4.95
+                };
+                
+                console.log('Sending order data:', orderData);
+                
+                const response = await fetch('http://localhost:5001/api/orders', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderData)
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response ok:', response.ok);
+                
+                const data = await response.json();
+                console.log('Response data:', data);
+                
+                if (response.ok && data.success) {
+                    resultDiv.innerHTML = `<div style="color: green;">Success! Order created: ${data.data.orderNumber}</div>`;
+                } else {
+                    resultDiv.innerHTML = `<div style="color: red;">Error: ${data.message || 'Unknown error'}</div>`;
+                }
+                
+            } catch (error) {
+                console.error('Test failed:', error);
+                resultDiv.innerHTML = `<div style="color: red;">Error: ${error.message}</div>`;
+            }
+        }
+    </script>
+</body>
+</html>

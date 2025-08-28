@@ -456,7 +456,7 @@ const Contact = () => {
                 name="budget"
                 value={formData.budget}
                 onChange={handleChange}
-                placeholder="e.g., $500 - $1000"
+                placeholder="e.g., 500 VNĐ - 1000 VNĐ"
               />
             </Grid>
             <Grid item xs={12}>

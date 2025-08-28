@@ -20,22 +20,22 @@ const Home = () => {
       id: 1,
       name: 'Espresso',
       description: 'Rich and bold espresso shot',
-      price: '$3.50',
-      image: 'https://images.unsplash.com/photo-1510707577719-ae7c14805e3a?w=300&h=200&fit=crop'
+      price: '3.50 VNĐ',
+      image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjOEI0NTEzIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyNCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Fc3ByZXNzbzwvdGV4dD48L3N2Zz4='
     },
     {
       id: 2,
       name: 'Cappuccino',
       description: 'Creamy cappuccino with perfect foam',
-      price: '$4.25',
-      image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=300&h=200&fit=crop'
+      price: '4.25 VNĐ',
+      image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjQTA1MjJEIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5DYXBwdWNjaW5vPC90ZXh0Pjwvc3ZnPg=='
     },
     {
       id: 3,
       name: 'Croissant',
       description: 'Fresh buttery croissant',
-      price: '$2.75',
-      image: 'https://images.unsplash.com/photo-1555507036-ab794f4afe5a?w=300&h=200&fit=crop'
+      price: '2.75 VNĐ',
+      image: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjRDA5MzQyIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIyMiIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Dcm9pc3NhbnQ8L3RleHQ+PC9zdmc+'
     }
   ];
 
@@ -44,7 +44,7 @@ const Home = () => {
       {/* Hero Banner */}
       <Box
         sx={{
-          backgroundImage: 'linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)), url(https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1200&h=600&fit=crop)',
+          background: 'linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #D2691E 100%)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           height: '60vh',
@@ -59,7 +59,11 @@ const Home = () => {
             variant="h2"
             component="h1"
             gutterBottom
-            sx={{ fontWeight: 'bold', mb: 2 }}
+            sx={{ 
+              fontWeight: 'bold', 
+              mb: 2,
+              fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' }
+            }}
           >
             Welcome to WebCaffe
           </Typography>
@@ -67,7 +71,11 @@ const Home = () => {
             variant="h5"
             component="p"
             gutterBottom
-            sx={{ mb: 4, opacity: 0.9 }}
+            sx={{ 
+              mb: 4, 
+              opacity: 0.9,
+              fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
+            }}
           >
             Experience the finest coffee and pastries in a cozy atmosphere
           </Typography>
@@ -122,16 +130,22 @@ const Home = () => {
           </Grid>
           <Grid item xs={12} md={6}>
             <Box
-              component="img"
-              src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=500&h=400&fit=crop"
-              alt="Coffee shop interior"
               sx={{
                 width: '100%',
-                height: 'auto',
+                height: '400px',
                 borderRadius: 2,
-                boxShadow: 3
+                boxShadow: 3,
+                background: 'linear-gradient(45deg, #8B4513 30%, #A0522D 90%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'white',
+                fontSize: '2rem',
+                fontWeight: 'bold'
               }}
-            />
+            >
+              WebCaffe Interior
+            </Box>
           </Grid>
         </Grid>
       </Container>
@@ -144,13 +158,18 @@ const Home = () => {
             component="h2"
             textAlign="center"
             gutterBottom
-            sx={{ fontWeight: 'bold', color: '#8B4513', mb: 6 }}
+            sx={{ 
+              fontWeight: 'bold', 
+              color: '#8B4513', 
+              mb: 6,
+              fontSize: { xs: '1.75rem', sm: '2.25rem', md: '3rem' }
+            }}
           >
             Featured Items
           </Typography>
           <Grid container spacing={4}>
-            {featuredItems.map((item) => (
-              <Grid item xs={12} sm={6} md={4} key={item.id}>
+          {featuredItems.map((item) => (
+            <Grid item xs={12} sm={6} lg={4} key={item.id}>
                 <Card
                   sx={{
                     height: '100%',

@@ -16,6 +16,7 @@ import Profile from './pages/Profile.jsx';
 import Cart from './pages/Cart.jsx';
 import Orders from './pages/Orders.jsx';
 import Admin from './pages/Admin.jsx';
+import MoMoReturn from './pages/MoMoReturn.jsx';
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
 import './App.css';
 
@@ -54,6 +55,7 @@ function App() {
                   <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                   <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
                   <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                  <Route path="/momo/return" element={<MoMoReturn />} />
                 </Routes>
               </Layout>
             </Router>

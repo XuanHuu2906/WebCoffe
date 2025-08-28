@@ -29,6 +29,7 @@ import {
   Cancel
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { formatPrice } from '../utils/formatPrice';
 
 const Orders = () => {
   const { user } = useAuth();
@@ -286,7 +287,7 @@ const Orders = () => {
                         sx={{ mb: 1 }}
                       />
                       <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#8B4513' }}>
-                        ${order.total.toFixed(2)}
+                        {formatPrice(order.total)}
                       </Typography>
                     </Box>
                   </Box>
@@ -390,7 +391,7 @@ const Orders = () => {
                       secondary={`Quantity: ${item.quantity}`}
                     />
                     <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.price * item.quantity)}
                     </Typography>
                   </ListItem>
                 ))}
@@ -401,7 +402,7 @@ const Orders = () => {
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h6">Total Amount:</Typography>
                 <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#8B4513' }}>
-                  ${selectedOrder.total.toFixed(2)}
+                  {formatPrice(selectedOrder.total)}
                 </Typography>
               </Box>
               

@@ -51,6 +51,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { formatPrice } from '../utils/formatPrice';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -104,7 +105,7 @@ const Cart = () => {
     sessionStartTime: Date.now()
   });
   
-  const steps = ['Order Details', 'Delivery & Payment', 'Confirmation'];
+  const steps = ['Order Details', 'Contact Information', 'Payment & Review'];
 
   // Analytics tracking functions
   const trackEvent = (eventType, eventData = {}) => {
@@ -184,6 +185,55 @@ const Cart = () => {
       trackEvent('cart_value_change', { cartValue, itemCount: items.length });
     }
   }, [items]);
+
+  // Authentication check - redirect to login if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <Container sx={{ py: 4, textAlign: 'center' }}>
+        <Typography
+          variant="h3"
+          component="h1"
+          gutterBottom
+          sx={{ fontWeight: 'bold', color: '#8B4513', mb: 4 }}
+        >
+          Shopping Cart
+        </Typography>
+        
+        <Paper elevation={3} sx={{ p: 6, maxWidth: 500, mx: 'auto' }}>
+          <Typography variant="h5" gutterBottom>
+            Please log in to view your cart
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+            You need to be logged in to access your shopping cart and place orders.
+          </Typography>
+          <Button
+            variant="contained"
+            component={Link}
+            to="/login"
+            sx={{
+              backgroundColor: '#8B4513',
+              '&:hover': { backgroundColor: '#A0522D' },
+              mr: 2
+            }}
+          >
+            Log In
+          </Button>
+          <Button
+            variant="outlined"
+            component={Link}
+            to="/menu"
+            sx={{
+              borderColor: '#8B4513',
+              color: '#8B4513',
+              '&:hover': { borderColor: '#A0522D', color: '#A0522D' }
+            }}
+          >
+            Browse Menu
+          </Button>
+        </Paper>
+      </Container>
+    );
+  }
 
   const cartSummary = getCartSummary();
 
@@ -313,10 +363,10 @@ const Cart = () => {
     // Simulate API call for promo code validation
     const validPromoCodes = {
       'WELCOME10': { type: 'percentage', value: 10, minOrder: 0, description: '10% off your order' },
-      'SAVE5': { type: 'fixed', value: 5, minOrder: 25, description: '$5 off orders over $25' },
-      'NEWCUSTOMER': { type: 'percentage', value: 15, minOrder: 30, description: '15% off orders over $30' },
-      'COFFEE20': { type: 'percentage', value: 20, minOrder: 50, description: '20% off orders over $50' },
-      'FREESHIP': { type: 'shipping', value: 0, minOrder: 20, description: 'Free delivery on orders over $20' }
+      'SAVE5': { type: 'fixed', value: 5, minOrder: 25, description: '5 VNĐ off orders over 25 VNĐ' },
+      'NEWCUSTOMER': { type: 'percentage', value: 15, minOrder: 30, description: '15% off orders over 30 VNĐ' },
+      'COFFEE20': { type: 'percentage', value: 20, minOrder: 50, description: '20% off orders over 50 VNĐ' },
+      'FREESHIP': { type: 'shipping', value: 0, minOrder: 20, description: 'Free delivery on orders over 20 VNĐ' }
     };
     
     const upperCode = code.toUpperCase();
@@ -327,7 +377,7 @@ const Cart = () => {
     }
     
     if (cartSummary.subtotal < promo.minOrder) {
-      throw new Error(`Minimum order of $${promo.minOrder} required for this promo code`);
+      throw new Error(`Minimum order of ${promo.minOrder} VNĐ required for this promo code`);
     }
     
     return {
@@ -551,20 +601,23 @@ const Cart = () => {
   const validateDeliveryInfo = () => {
     const errors = {};
     
+    // Always validate contact information (required for both pickup and delivery)
+    if (!deliveryInfo.fullName.trim()) {
+      errors.fullName = 'Full name is required';
+    }
+    if (!deliveryInfo.phone.trim()) {
+      errors.phone = 'Phone number is required';
+    } else if (!/^[\d\s\-\+\(\)]+$/.test(deliveryInfo.phone)) {
+      errors.phone = 'Please enter a valid phone number';
+    }
+    if (!deliveryInfo.email.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(deliveryInfo.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    // Additional validation for delivery orders
     if (orderType === 'delivery') {
-      if (!deliveryInfo.fullName.trim()) {
-        errors.fullName = 'Full name is required';
-      }
-      if (!deliveryInfo.phone.trim()) {
-        errors.phone = 'Phone number is required';
-      } else if (!/^[\d\s\-\+\(\)]+$/.test(deliveryInfo.phone)) {
-        errors.phone = 'Please enter a valid phone number';
-      }
-      if (!deliveryInfo.email.trim()) {
-        errors.email = 'Email is required';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(deliveryInfo.email)) {
-        errors.email = 'Please enter a valid email address';
-      }
       if (!deliveryInfo.address.trim()) {
         errors.address = 'Address is required';
       }
@@ -652,7 +705,7 @@ const Cart = () => {
       const finalTotals = getFinalTotals();
       const orderData = {
         items: items.map(item => ({
-          productId: item.product._id,
+          product: item.product._id,
           name: item.product.name,
           size: item.size || 'Regular',
           quantity: item.quantity,
@@ -661,7 +714,12 @@ const Cart = () => {
         orderType,
         paymentMethod,
         notes: orderNotes,
-        deliveryInfo: orderType === 'delivery' ? deliveryInfo : null,
+        deliveryAddress: orderType === 'delivery' ? {
+          street: deliveryInfo.address,
+          city: deliveryInfo.city,
+          zipCode: deliveryInfo.zipCode,
+          instructions: deliveryInfo.instructions
+        } : null,
         subtotal: finalTotals.subtotal,
         discount: finalTotals.discount,
         tax: finalTotals.tax,
@@ -674,49 +732,124 @@ const Cart = () => {
         } : null
       };
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(orderData)
-      });
+      console.log('DEBUG: Order data being sent:', orderData);
+      console.log('DEBUG: API URL:', import.meta.env.VITE_API_URL);
+      console.log('DEBUG: Token:', token ? 'Present' : 'Missing');
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('Session expired. Please log in again.');
-        }
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to process order. Please try again.');
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        // Track successful checkout
-        trackEvent('checkout_completed', {
-          orderId: data.order?._id,
-          cartValue: cartSummary.total,
-          itemCount: items.length,
-          orderType,
-          paymentMethod,
-          promoCodeUsed: appliedPromo?.code,
-          discountAmount: cartSummary.discount
+      // Handle MoMo payment differently
+      if (paymentMethod === 'momo') {
+        // First create the order
+        console.log('DEBUG: Making MoMo order request to:', `${import.meta.env.VITE_API_URL}/api/orders`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(orderData)
         });
-        
-        // Clear cart and show success
-        clearCart();
-        setOrderSuccess(true);
-        setShowCheckoutDialog(false);
-        setActiveStep(0);
-        
-        // Reset success message after 5 seconds
-        setTimeout(() => {
-          setOrderSuccess(false);
-          navigate('/orders');
-        }, 3000);
+        console.log('DEBUG: MoMo order response status:', response.status);
+        console.log('DEBUG: MoMo order response ok:', response.ok);
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Session expired. Please log in again.');
+          }
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to create order. Please try again.');
+        }
+
+        const orderResult = await response.json();
+        if (orderResult.success) {
+          // Create MoMo payment request
+          const momoResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/momo/create`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              orderId: orderResult.order.orderNumber,
+              amount: Math.round(finalTotals.total * 100), // Convert to cents
+              orderInfo: `Payment for order ${orderResult.order.orderNumber}`
+            })
+          });
+
+          if (!momoResponse.ok) {
+            throw new Error('Failed to create MoMo payment. Please try again.');
+          }
+
+          const momoData = await momoResponse.json();
+          if (momoData.success && momoData.payUrl) {
+            // Track MoMo payment initiation
+            trackEvent('momo_payment_initiated', {
+              orderId: orderResult.order._id,
+              cartValue: cartSummary.total,
+              itemCount: items.length
+            });
+            
+            // Clear cart and redirect to MoMo payment
+            clearCart();
+            setShowCheckoutDialog(false);
+            setActiveStep(0);
+            
+            // Redirect to MoMo payment page
+            window.location.href = momoData.payUrl;
+          } else {
+            throw new Error(momoData.message || 'Failed to initialize MoMo payment');
+          }
+        } else {
+          throw new Error(orderResult.message || 'Failed to create order');
+        }
       } else {
-        throw new Error(data.message || 'Failed to process order');
+        // Handle other payment methods (card, cash)
+        console.log('DEBUG: Making regular order request to:', `${import.meta.env.VITE_API_URL}/api/orders`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(orderData)
+        });
+        console.log('DEBUG: Regular order response status:', response.status);
+        console.log('DEBUG: Regular order response ok:', response.ok);
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Session expired. Please log in again.');
+          }
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to process order. Please try again.');
+        }
+
+        const data = await response.json();
+        if (data.success) {
+          // Track successful checkout
+          trackEvent('checkout_completed', {
+            orderId: data.order?._id,
+            cartValue: cartSummary.total,
+            itemCount: items.length,
+            orderType,
+            paymentMethod,
+            promoCodeUsed: appliedPromo?.code,
+            discountAmount: cartSummary.discount
+          });
+          
+          // Clear cart and show success
+          clearCart();
+          setOrderSuccess(true);
+          setShowCheckoutDialog(false);
+          setActiveStep(0);
+          
+          // Reset success message after 5 seconds
+          setTimeout(() => {
+            setOrderSuccess(false);
+            navigate('/orders');
+          }, 3000);
+        } else {
+          throw new Error(data.message || 'Failed to process order');
+        }
       }
     } catch (error) {
       console.error('Checkout failed:', error);
@@ -879,11 +1012,12 @@ const Cart = () => {
                         width: { xs: '100%', sm: 140 }, 
                         height: { xs: 200, sm: 140 }, 
                         borderRadius: 2,
-                        objectFit: 'cover',
+                        objectFit: 'contain',
+                        backgroundColor: '#f5f5f5',
                         mr: { xs: 0, sm: 2 },
                         mb: { xs: 2, sm: 0 }
                       }}
-                      image={item.product.image || `https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop&auto=format`}
+                      image={item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${item.product.image}`) : `https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop&auto=format`}
                       alt={item.product.name}
                     />
                     <CardContent sx={{ flex: 1, p: 0, '&:last-child': { pb: 0 } }}>
@@ -956,7 +1090,7 @@ const Cart = () => {
                           </Box>
                           
                           <Typography variant="body1" sx={{ fontWeight: 'medium', color: '#8B4513' }}>
-                            ${item.price.toFixed(2)} each
+                            {formatPrice(item.price)} each
                           </Typography>
                         </Box>
                         <IconButton
@@ -1057,10 +1191,10 @@ const Cart = () => {
                           mt: { xs: 1, sm: 0 }
                         }}>
                           <Typography variant="body2" color="text.secondary">
-                            {item.quantity} × ${item.price.toFixed(2)}
+                            {item.quantity} × {formatPrice(item.price)}
                           </Typography>
                           <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#8B4513' }}>
-                            ${(item.price * item.quantity).toFixed(2)}
+                            {formatPrice(item.price * item.quantity)}
                           </Typography>
                         </Box>
                       </Box>
@@ -1165,23 +1299,23 @@ const Cart = () => {
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography>Subtotal:</Typography>
-                <Typography>${getFinalTotals().subtotal.toFixed(2)}</Typography>
+                <Typography>{formatPrice(getFinalTotals().subtotal)}</Typography>
               </Box>
               {appliedPromo && getFinalTotals().discount > 0 && (
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography sx={{ color: '#4caf50' }}>Discount ({appliedPromo.code}):</Typography>
-                  <Typography sx={{ color: '#4caf50' }}>-${getFinalTotals().discount.toFixed(2)}</Typography>
+                  <Typography sx={{ color: '#4caf50' }}>-{formatPrice(getFinalTotals().discount)}</Typography>
                 </Box>
               )}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                 <Typography>Tax (8.5%):</Typography>
-                <Typography>${getFinalTotals().tax.toFixed(2)}</Typography>
+                <Typography>{formatPrice(getFinalTotals().tax)}</Typography>
               </Box>
               <Divider sx={{ my: 2 }} />
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h6" sx={{ fontWeight: 'bold' }}>Total:</Typography>
                 <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#8B4513' }}>
-                  ${getFinalTotals().total.toFixed(2)}
+                  {formatPrice(getFinalTotals().total)}
                 </Typography>
               </Box>
             </Box>
@@ -1249,7 +1383,7 @@ const Cart = () => {
           
           <Grid container spacing={3}>
             {getRecommendations().map((product) => (
-              <Grid item xs={12} sm={6} md={4} key={product._id}>
+              <Grid item xs={12} sm={6} md={3} key={product._id}>
                 <Card
                   sx={{
                     height: '100%',
@@ -1265,8 +1399,9 @@ const Cart = () => {
                   <CardMedia
                     component="img"
                     height="180"
-                    image={product.image || 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=180&fit=crop'}
+                    image={product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${product.image}`) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=180&fit=crop'}
                     alt={product.name}
+                    sx={{ objectFit: 'contain', backgroundColor: '#f5f5f5' }}
                   />
                   <CardContent sx={{ flexGrow: 1, pb: 1 }}>
                     <Typography
@@ -1296,7 +1431,7 @@ const Cart = () => {
                         variant="h6"
                         sx={{ fontWeight: 'bold', color: '#8B4513' }}
                       >
-                        ${product.price.toFixed(2)}
+                        {formatPrice(product.price)}
                       </Typography>
                       {product.featured && (
                         <Chip
@@ -1422,7 +1557,7 @@ const Cart = () => {
                 {orderType === 'delivery' && (
                   <Alert severity="info" sx={{ mb: 2 }}>
                     <Typography variant="body2">
-                      <strong>Delivery Fee:</strong> $3.99<br />
+                      <strong>Delivery Fee:</strong> 3.99 VNĐ<br />
                       <strong>Estimated Time:</strong> 30-45 minutes<br />
                       <strong>Delivery Area:</strong> Within 5 miles of our store
                     </Typography>
@@ -1580,6 +1715,16 @@ const Cart = () => {
                         </Box>
                       }
                     />
+                    <FormControlLabel
+                      value="momo"
+                      control={<Radio />}
+                      label={
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <AccountBalanceWallet />
+                          MoMo E-Wallet
+                        </Box>
+                      }
+                    />
                   </RadioGroup>
                 </FormControl>
 
@@ -1592,7 +1737,7 @@ const Cart = () => {
                       {item.product.name} {item.size ? `(${item.size})` : ''}
                     </Typography>
                     <Typography variant="body2" color="text.secondary">
-                      Quantity: {item.quantity} × ${item.price.toFixed(2)} = ${(item.quantity * item.price).toFixed(2)}
+                      Quantity: {item.quantity} × {formatPrice(item.price)} = {formatPrice(item.quantity * item.price)}
                     </Typography>
                   </Box>
                 ))}
@@ -1601,22 +1746,22 @@ const Cart = () => {
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body1">Subtotal:</Typography>
-                  <Typography variant="body1">${cartSummary.subtotal.toFixed(2)}</Typography>
+                  <Typography variant="body1">{formatPrice(cartSummary.subtotal)}</Typography>
                 </Box>
                 {orderType === 'delivery' && (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                     <Typography variant="body1">Delivery Fee:</Typography>
-                    <Typography variant="body1">$3.99</Typography>
+                    <Typography variant="body1">3.99 VNĐ</Typography>
                   </Box>
                 )}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                   <Typography variant="body1">Tax:</Typography>
-                  <Typography variant="body1">${cartSummary.tax.toFixed(2)}</Typography>
+                  <Typography variant="body1">{formatPrice(cartSummary.tax)}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                   <Typography variant="h6" fontWeight="bold">Total:</Typography>
                   <Typography variant="h6" fontWeight="bold">
-                    ${(cartSummary.total + (orderType === 'delivery' ? 3.99 : 0)).toFixed(2)}
+                    {formatPrice(cartSummary.total + (orderType === 'delivery' ? 3.99 : 0))}
                   </Typography>
                 </Box>
                 

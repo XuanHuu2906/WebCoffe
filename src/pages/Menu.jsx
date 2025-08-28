@@ -22,6 +22,7 @@ import {
 import { Search, Add, Remove } from '@mui/icons-material';
 import { useProducts } from '../contexts/ProductContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
+import { formatPrice } from '../utils/formatPrice';
 
 const Menu = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -99,6 +100,42 @@ const Menu = () => {
     return getItemQuantity(product._id, size);
   };
 
+  // Group products by category
+  const groupProductsByCategory = (products) => {
+    const grouped = {};
+    
+    // If a specific category is selected, only show that category
+    if (selectedCategory) {
+      // For selected category, just group by that category
+      products.forEach(product => {
+        if (!grouped[product.category]) {
+          grouped[product.category] = [];
+        }
+        grouped[product.category].push(product);
+      });
+    } else {
+      // When no category filter is applied, show all with "Best seller" section
+      // First, handle featured products as a special category
+      const featuredProducts = products.filter(product => product.featured);
+      if (featuredProducts.length > 0) {
+        grouped['Best seller'] = featuredProducts;
+      }
+      
+      // Then group by actual categories
+      products.forEach(product => {
+        if (!grouped[product.category]) {
+          grouped[product.category] = [];
+        }
+        grouped[product.category].push(product);
+      });
+    }
+    
+    return grouped;
+  };
+
+  // Get grouped products
+  const groupedProducts = groupProductsByCategory(products);
+
   return (
     <Container sx={{ py: 4 }}>
       <Typography
@@ -106,7 +143,12 @@ const Menu = () => {
         component="h1"
         textAlign="center"
         gutterBottom
-        sx={{ fontWeight: 'bold', color: '#8B4513', mb: 4 }}
+        sx={{ 
+          fontWeight: 'bold', 
+          color: '#8B4513', 
+          mb: 4,
+          fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
+        }}
       >
         Our Menu
       </Typography>
@@ -114,7 +156,7 @@ const Menu = () => {
       {/* Search and Filter Controls */}
       <Box sx={{ mb: 4 }}>
         <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={6}>
             <TextField
               placeholder="Search menu items..."
               variant="outlined"
@@ -130,7 +172,7 @@ const Menu = () => {
               }}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
               <InputLabel>Category</InputLabel>
               <Select
@@ -164,136 +206,162 @@ const Menu = () => {
         </Box>
       )}
 
-      {/* Menu Items Grid */}
+      {/* Menu Items by Category */}
       {!loading && (
-        <Grid container spacing={3}>
+        <Box>
           {products.length === 0 ? (
-            <Grid item xs={12}>
-              <Typography
-                variant="h6"
-                textAlign="center"
-                color="text.secondary"
-                sx={{ py: 4 }}
-              >
-                No products found. Try adjusting your search or filters.
-              </Typography>
-            </Grid>
+            <Typography
+              variant="h6"
+              textAlign="center"
+              color="text.secondary"
+              sx={{ py: 4 }}
+            >
+              No products found. Try adjusting your search or filters.
+            </Typography>
           ) : (
-            products.map((product) => {
-              const currentQuantity = getCurrentQuantity(product);
-              const currentPrice = getCurrentPrice(product);
-              
-              return (
-                <Grid item xs={12} sm={6} md={4} key={product._id}>
-                  <Card
-                    sx={{
-                      height: '100%',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      transition: 'transform 0.2s',
-                      '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: 4
-                      }
-                    }}
-                  >
-                    <CardMedia
-                      component="img"
-                      height="200"
-                      image={product.image || 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop'}
-                      alt={product.name}
-                    />
-                    <CardContent sx={{ flexGrow: 1 }}>
-                      <Typography
-                        gutterBottom
-                        variant="h5"
-                        component="h3"
-                        sx={{ fontWeight: 'bold' }}
-                      >
-                        {product.name}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                        {product.description}
-                      </Typography>
-                      
-                      {/* Size Selection */}
-                      {product.sizes && product.sizes.length > 0 && (
-                        <FormControl size="small" sx={{ mb: 2, minWidth: 120 }}>
-                          <InputLabel>Size</InputLabel>
-                          <Select
-                            value={selectedSize[product._id] || ''}
-                            label="Size"
-                            onChange={(e) => handleSizeChange(product._id, e.target.value)}
-                          >
-                            {product.sizes.map((size) => (
-                              <MenuItem key={size.name} value={size.name}>
-                                {size.name} - ${size.price.toFixed(2)}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      )}
-                      
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 'bold', color: '#8B4513' }}
-                      >
-                        ${currentPrice.toFixed(2)}
-                      </Typography>
-                      
-                      {product.featured && (
-                        <Chip
-                          label="Featured"
-                          color="primary"
-                          size="small"
-                          sx={{ mt: 1, backgroundColor: '#8B4513' }}
-                        />
-                      )}
-                    </CardContent>
-                    <CardActions sx={{ p: 2, flexDirection: 'column', gap: 1 }}>
-                      {currentQuantity > 0 ? (
-                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
-                          <Button
-                            size="small"
-                            onClick={() => handleUpdateQuantity(product, currentQuantity - 1)}
-                            sx={{ minWidth: 40 }}
-                          >
-                            <Remove />
-                          </Button>
-                          <Typography variant="h6" sx={{ mx: 2 }}>
-                            {currentQuantity}
-                          </Typography>
-                          <Button
-                            size="small"
-                            onClick={() => handleUpdateQuantity(product, currentQuantity + 1)}
-                            sx={{ minWidth: 40 }}
-                          >
-                            <Add />
-                          </Button>
-                        </Box>
-                      ) : (
-                        <Button
-                          variant="contained"
-                          fullWidth
-                          onClick={() => handleAddToCart(product)}
-                          disabled={product.sizes && product.sizes.length > 0 && !selectedSize[product._id]}
+            Object.entries(groupedProducts).map(([categoryName, categoryProducts]) => (
+              <Box key={categoryName} sx={{ mb: 6 }}>
+                {/* Category Header */}
+                <Typography
+                  variant="h4"
+                  component="h2"
+                  sx={{
+                    fontWeight: 'bold',
+                    color: '#8B4513',
+                    mb: 3,
+                    fontSize: { xs: '1.5rem', sm: '2rem', md: '2.5rem' },
+                    borderBottom: '2px solid #8B4513',
+                    paddingBottom: 1
+                  }}
+                >
+                  {categoryName}
+                </Typography>
+                
+                {/* Products Grid for this Category */}
+                <Grid container spacing={3}>
+                  {categoryProducts.map((product) => {
+                    const currentQuantity = getCurrentQuantity(product);
+                    const currentPrice = getCurrentPrice(product);
+                    
+                    return (
+                      <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
+                        <Card
                           sx={{
-                            backgroundColor: '#8B4513',
+                            height: '100%',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            transition: 'transform 0.2s',
                             '&:hover': {
-                              backgroundColor: '#A0522D'
+                              transform: 'translateY(-4px)',
+                              boxShadow: 4
                             }
                           }}
                         >
-                          Add to Cart
-                        </Button>
-                      )}
-                    </CardActions>
-                  </Card>
+                          <CardMedia
+                            component="img"
+                            height="330"
+                            image={product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${product.image}`) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop'}
+                            alt={product.name}
+                            sx={{ objectFit: 'cover', backgroundColor: '#f5f5f5' }}
+                          />
+                          <CardContent sx={{ flexGrow: 1 }}>
+                            <Typography
+                              gutterBottom
+                              variant="h5"
+                              component="h3"
+                              sx={{ fontWeight: 'bold' }}
+                            >
+                              {product.name}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                              {product.description}
+                            </Typography>
+                            
+                            {/* Size Selection */}
+                            {product.sizes && product.sizes.length > 0 && (
+                              <FormControl fullWidth size="small" sx={{ mb: 2 }}>
+                                <InputLabel>Size</InputLabel>
+                                <Select
+                                  value={selectedSize[product._id] || ''}
+                                  label="Size"
+                                  onChange={(e) => handleSizeChange(product._id, e.target.value)}
+                                >
+                                  {product.sizes.map((size) => (
+                                    <MenuItem key={size.name} value={size.name}>
+                                      {size.name}
+                                    </MenuItem>
+                                  ))}
+                                </Select>
+                              </FormControl>
+                            )}
+                            
+                            {/* Only show price after size selection for products with sizes */}
+                            {((product.sizes && product.sizes.length > 0 && selectedSize[product._id]) || 
+                              (!product.sizes || product.sizes.length === 0)) && (
+                              <Typography
+                                variant="h6"
+                                sx={{ fontWeight: 'bold', color: '#8B4513' }}
+                              >
+                                {formatPrice(currentPrice)}
+                              </Typography>
+                            )}
+                            
+                            {product.featured && (
+                              <Chip
+                                label="Featured"
+                                color="primary"
+                                size="small"
+                                sx={{ mt: 1, backgroundColor: '#8B4513' }}
+                              />
+                            )}
+                          </CardContent>
+                          <CardActions sx={{ p: 2, flexDirection: 'column', gap: 1 }}>
+                            {currentQuantity > 0 ? (
+                              <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between' }}>
+                                <Button
+                                  size="small"
+                                  onClick={() => handleUpdateQuantity(product, currentQuantity - 1)}
+                                  sx={{ minWidth: 40 }}
+                                >
+                                  <Remove />
+                                </Button>
+                                <Typography variant="h6" sx={{ mx: 2 }}>
+                                  {currentQuantity}
+                                </Typography>
+                                <Button
+                                  size="small"
+                                  onClick={() => handleUpdateQuantity(product, currentQuantity + 1)}
+                                  sx={{ minWidth: 40 }}
+                                >
+                                  <Add />
+                                </Button>
+                              </Box>
+                            ) : (
+                              <Button
+                                variant="contained"
+                                fullWidth
+                                onClick={() => handleAddToCart(product)}
+                                disabled={product.sizes && product.sizes.length > 0 && !selectedSize[product._id]}
+                                sx={{
+                                  backgroundColor: '#8B4513',
+                                  '&:hover': {
+                                    backgroundColor: '#A0522D'
+                                  }
+                                }}
+                              >
+                                Add to Cart
+                              </Button>
+                            )}
+                          </CardActions>
+                        </Card>
+                      </Grid>
+                    );
+                  })}
                 </Grid>
-              );
-            })
+              </Box>
+            ))
           )}
-        </Grid>
+        </Box>
       )}
     </Container>
   );
