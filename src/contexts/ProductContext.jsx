@@ -235,19 +235,65 @@ export const ProductProvider = ({ children }) => {
     }
   };
 
+  // Create new product
+  const createProduct = async (productData) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/products`, productData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      // Refresh products list after creation
+      await fetchProducts(state.filters);
+      
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to create product';
+      throw new Error(errorMessage);
+    }
+  };
+
+  // Update existing product
+  const updateProduct = async (productId, productData) => {
+    try {
+      const response = await axios.put(`${API_BASE_URL}/products/${productId}`, productData, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      // Refresh products list after update
+      await fetchProducts(state.filters);
+      
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to update product';
+      throw new Error(errorMessage);
+    }
+  };
+
+  // Delete product
+  const deleteProduct = async (productId) => {
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/products/${productId}`);
+      
+      // Refresh products list after deletion
+      await fetchProducts(state.filters);
+      
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to delete product';
+      throw new Error(errorMessage);
+    }
+   };
+
   // Load initial data on mount
   useEffect(() => {
-    fetchProducts(state.filters);
+    fetchProducts();
     fetchCategories();
     fetchFeaturedProducts();
-  }, [fetchProducts, fetchCategories, fetchFeaturedProducts, state.filters]);
-
-  // Refetch products when filters change
-  useEffect(() => {
-    if (state.filters.category || state.filters.search || state.filters.featured) {
-      fetchProducts(state.filters);
-    }
-  }, [state.filters.category, state.filters.search, state.filters.featured, state.filters, fetchProducts]);
+  }, [fetchProducts, fetchCategories, fetchFeaturedProducts]);
 
   const value = {
     ...state,
@@ -259,7 +305,10 @@ export const ProductProvider = ({ children }) => {
     clearFilters,
     searchProducts,
     filterByCategory,
-    loadMoreProducts
+    loadMoreProducts,
+    createProduct,
+    updateProduct,
+    deleteProduct
   };
 
   return (

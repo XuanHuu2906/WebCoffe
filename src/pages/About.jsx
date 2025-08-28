@@ -169,10 +169,27 @@ const About = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Typography variant="h2" component="h1" gutterBottom sx={{ fontWeight: 'bold', mb: 3 }}>
+          <Typography 
+            variant="h2" 
+            component="h1" 
+            gutterBottom 
+            sx={{ 
+              fontWeight: 'bold', 
+              mb: 3,
+              fontSize: { xs: '2rem', sm: '2.5rem', md: '3.5rem' }
+            }}
+          >
             Crafting Community Through Coffee
           </Typography>
-          <Typography variant="h5" sx={{ mb: 4, maxWidth: '600px', mx: 'auto' }}>
+          <Typography 
+            variant="h5" 
+            sx={{ 
+              mb: 4, 
+              maxWidth: '600px', 
+              mx: 'auto',
+              fontSize: { xs: '1rem', sm: '1.25rem', md: '1.5rem' }
+            }}
+          >
             Where exceptional beans meet passionate craftsmanship to create unforgettable coffee experiences
           </Typography>
           <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap', mb: 4 }}>

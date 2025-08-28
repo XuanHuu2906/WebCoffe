@@ -50,10 +50,12 @@ import {
 } from '@mui/icons-material';
 import { useProducts } from '../contexts/ProductContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import ImageUpload from '../components/ImageUpload.jsx';
+import { formatPrice } from '../utils/formatPrice';
 
 const Admin = () => {
   const { user } = useAuth();
-  const { products, categories, fetchProducts } = useProducts();
+  const { products, categories, fetchProducts, createProduct, updateProduct, deleteProduct } = useProducts();
   const [currentTab, setCurrentTab] = useState(0);
   const [showProductDialog, setShowProductDialog] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -61,7 +63,6 @@ const Admin = () => {
   const [productForm, setProductForm] = useState({
     name: '',
     description: '',
-    price: '',
     category: '',
     image: '',
     featured: false,
@@ -81,23 +82,98 @@ const Admin = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
+  
+  // Dashboard stats state
+  const [dashboardStats, setDashboardStats] = useState({
+    totalProducts: 0,
+    totalOrders: 0,
+    totalCustomers: 0,
+    totalRevenue: 0,
+    recentOrders: []
+  });
+  const [dashboardLoading, setDashboardLoading] = useState(false);
+  const [dashboardError, setDashboardError] = useState(null);
 
-  // Mock data for dashboard stats
-  const dashboardStats = {
-    totalProducts: products.length,
-    totalOrders: 156,
-    totalCustomers: 89,
-    totalRevenue: 12450.75,
-    recentOrders: [
-      { id: 'ORD-001', customer: 'John Doe', total: 24.50, status: 'completed' },
-      { id: 'ORD-002', customer: 'Jane Smith', total: 18.75, status: 'processing' },
-      { id: 'ORD-003', customer: 'Bob Johnson', total: 31.25, status: 'delivered' }
-    ]
+  // Fetch dashboard statistics
+  const fetchDashboardStats = async () => {
+    setDashboardLoading(true);
+    setDashboardError(null);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/dashboard/stats`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch dashboard statistics');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setDashboardStats(prev => ({
+          ...prev,
+          totalProducts: data.data.totalProducts,
+          totalOrders: data.data.totalOrders,
+          totalCustomers: data.data.totalCustomers,
+          totalRevenue: data.data.totalRevenue
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      setDashboardError(error.message);
+    } finally {
+      setDashboardLoading(false);
+    }
+  };
+
+  // Fetch recent orders
+  const fetchRecentOrders = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/dashboard/recent-orders?limit=5`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch recent orders');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setDashboardStats(prev => ({
+          ...prev,
+          recentOrders: data.data
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching recent orders:', error);
+      setDashboardError(error.message);
+    }
   };
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+    if (user && user.role === 'admin') {
+      fetchDashboardStats();
+      fetchRecentOrders();
+    }
+  }, [user]);
 
   // Handle tab change
   const handleTabChange = (event, newValue) => {
@@ -115,19 +191,11 @@ const Admin = () => {
         if (!value.trim()) return 'Description is required';
         if (value.trim().length < 10) return 'Description must be at least 10 characters';
         return '';
-      case 'price':
-        if (!value) return 'Price is required';
-        const price = parseFloat(value);
-        if (isNaN(price) || price <= 0) return 'Price must be a positive number';
-        if (price > 1000) return 'Price cannot exceed $1000';
-        return '';
       case 'category':
         if (!value) return 'Category is required';
         return '';
       case 'image':
-        if (value && !value.match(/^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i)) {
-          return 'Please enter a valid image URL';
-        }
+        // Image validation is now handled by the ImageUpload component
         return '';
       default:
         return '';
@@ -144,7 +212,6 @@ const Admin = () => {
         if (!value) return 'Price is required';
         const price = parseFloat(value);
         if (isNaN(price) || price <= 0) return 'Price must be a positive number';
-        if (price > 1000) return 'Price cannot exceed $1000';
         return '';
       default:
         return '';
@@ -224,31 +291,39 @@ const Admin = () => {
     setProductTouched({
       name: true,
       description: true,
-      price: true,
       category: true,
       image: true
     });
+
+    // Check if at least one size is added
+    if (productForm.sizes.length === 0) {
+      setError('Please add at least one size with pricing for this product.');
+      return;
+    }
 
     if (Object.keys(errors).length === 0) {
       setSaveLoading(true);
       setError(null);
       try {
-        // Simulate API call with potential failure
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            // Simulate random failure for demonstration
-            if (Math.random() > 0.9) {
-              reject(new Error('Failed to save product. Please try again.'));
-            } else {
-              resolve();
-            }
-          }, 1500);
-        });
+        const productData = {
+          name: productForm.name,
+          description: productForm.description,
+          price: productForm.sizes[0].price, // Use first size price as base price
+          category: productForm.category,
+          image: productForm.image,
+          featured: productForm.featured,
+          inStock: productForm.available,
+          sizes: productForm.sizes
+        };
+
+        if (editingProduct) {
+          await updateProduct(editingProduct._id, productData);
+        } else {
+          await createProduct(productData);
+        }
         
-        console.log('Saving product:', productForm);
         setShowProductDialog(false);
         resetProductForm();
-        // Show success message
         setError(null);
       } catch (error) {
         console.error('Failed to save product:', error);
@@ -264,7 +339,6 @@ const Admin = () => {
     setProductForm({
       name: '',
       description: '',
-      price: '',
       category: '',
       image: '',
       featured: false,
@@ -282,7 +356,6 @@ const Admin = () => {
     setProductForm({
       name: product.name,
       description: product.description,
-      price: product.price.toString(),
       category: product.category,
       image: product.image || '',
       featured: product.featured || false,
@@ -298,20 +371,8 @@ const Admin = () => {
       setLoading(true);
       setError(null);
       try {
-        // Simulate API call with potential failure
-        await new Promise((resolve, reject) => {
-          setTimeout(() => {
-            // Simulate random failure for demonstration
-            if (Math.random() > 0.95) {
-              reject(new Error('Failed to delete product. Please try again.'));
-            } else {
-              resolve();
-            }
-          }, 1000);
-        });
-        
-        console.log('Deleting product:', productId);
-        // In a real app, you would refresh the products list here
+        await deleteProduct(productId);
+        setError(null);
       } catch (error) {
         console.error('Failed to delete product:', error);
         setError(error.message || 'Failed to delete product. Please try again.');
@@ -392,6 +453,30 @@ const Admin = () => {
   // Dashboard Tab Content
   const DashboardTab = () => (
     <Grid container spacing={3}>
+      {/* Dashboard Error */}
+      {dashboardError && (
+        <Grid item xs={12}>
+          <Alert 
+            severity="error" 
+            sx={{ mb: 2 }}
+            action={
+              <Button 
+                color="inherit" 
+                size="small" 
+                onClick={() => {
+                  fetchDashboardStats();
+                  fetchRecentOrders();
+                }}
+              >
+                Retry
+              </Button>
+            }
+          >
+            {dashboardError}
+          </Alert>
+        </Grid>
+      )}
+      
       {/* Stats Cards */}
       <Grid item xs={12} sm={6} md={3}>
         <Card sx={{ backgroundColor: '#8B4513', color: 'white' }}>
@@ -399,7 +484,11 @@ const Admin = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
                 <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {dashboardStats.totalProducts}
+                  {dashboardLoading ? (
+                    <CircularProgress size={24} sx={{ color: 'white' }} />
+                  ) : (
+                    dashboardStats.totalProducts
+                  )}
                 </Typography>
                 <Typography variant="body2">Total Products</Typography>
               </Box>
@@ -415,7 +504,11 @@ const Admin = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
                 <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {dashboardStats.totalOrders}
+                  {dashboardLoading ? (
+                    <CircularProgress size={24} sx={{ color: 'white' }} />
+                  ) : (
+                    dashboardStats.totalOrders
+                  )}
                 </Typography>
                 <Typography variant="body2">Total Orders</Typography>
               </Box>
@@ -431,7 +524,11 @@ const Admin = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
                 <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  {dashboardStats.totalCustomers}
+                  {dashboardLoading ? (
+                    <CircularProgress size={24} sx={{ color: 'white' }} />
+                  ) : (
+                    dashboardStats.totalCustomers
+                  )}
                 </Typography>
                 <Typography variant="body2">Total Customers</Typography>
               </Box>
@@ -447,7 +544,11 @@ const Admin = () => {
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box>
                 <Typography variant="h4" sx={{ fontWeight: 'bold' }}>
-                  ${dashboardStats.totalRevenue.toLocaleString()}
+                  {dashboardLoading ? (
+                    <CircularProgress size={24} sx={{ color: 'white' }} />
+                  ) : (
+                    `${dashboardStats.totalRevenue.toLocaleString()} VNĐ`
+                  )}
                 </Typography>
                 <Typography variant="body2">Total Revenue</Typography>
               </Box>
@@ -463,40 +564,61 @@ const Admin = () => {
           <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
             Recent Orders
           </Typography>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Order ID</TableCell>
-                  <TableCell>Customer</TableCell>
-                  <TableCell>Total</TableCell>
-                  <TableCell>Status</TableCell>
-                  <TableCell>Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {dashboardStats.recentOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell>{order.id}</TableCell>
-                    <TableCell>{order.customer}</TableCell>
-                    <TableCell>${order.total.toFixed(2)}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={order.status}
-                        color={order.status === 'completed' ? 'success' : order.status === 'processing' ? 'warning' : 'primary'}
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <IconButton size="small">
-                        <Visibility />
-                      </IconButton>
-                    </TableCell>
+          {dashboardLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress sx={{ color: '#8B4513' }} />
+            </Box>
+          ) : dashboardStats.recentOrders.length === 0 ? (
+            <Box sx={{ textAlign: 'center', py: 4 }}>
+              <Typography variant="body1" color="text.secondary">
+                No recent orders found
+              </Typography>
+            </Box>
+          ) : (
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Order Number</TableCell>
+                    <TableCell>Customer</TableCell>
+                    <TableCell>Total</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Date</TableCell>
+                    <TableCell>Actions</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+                <TableBody>
+                  {dashboardStats.recentOrders.map((order) => (
+                    <TableRow key={order._id}>
+                      <TableCell>{order.orderNumber}</TableCell>
+                      <TableCell>{order.customerName}</TableCell>
+                      <TableCell>{formatPrice(order.total)}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={order.status}
+                          color={
+                            order.status === 'completed' ? 'success' : 
+                            order.status === 'processing' ? 'warning' : 
+                            order.status === 'delivered' ? 'info' :
+                            'default'
+                          }
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        {new Date(order.createdAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton size="small">
+                          <Visibility />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
         </Paper>
       </Grid>
     </Grid>
@@ -534,53 +656,71 @@ const Admin = () => {
       </Box>
 
       {/* Products Table */}
-      <TableContainer component={Paper}>
-        <Table>
+      <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+        <Table sx={{ minWidth: { xs: 600, md: 750 } }}>
           <TableHead>
             <TableRow>
-              <TableCell>Image</TableCell>
+              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Image</TableCell>
               <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
+              <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Category</TableCell>
               <TableCell>Price</TableCell>
-              <TableCell>Featured</TableCell>
-              <TableCell>Available</TableCell>
+              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Featured</TableCell>
+              <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Available</TableCell>
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {filteredProducts.map((product) => (
               <TableRow key={product._id}>
-                <TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                   <img
-                    src={product.image || 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=60&h=60&fit=crop'}
+                    src={product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${product.image}`) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAyNUgxNVYzNUgyMFYyNVoiIGZpbGw9IiM4QjQ1MTMiLz4KPHA+dGggZD0iTTQ1IDI1SDQwVjM1SDQ1VjI1WiIgZmlsbD0iIzhCNDUxMyIvPgo8cGF0aCBkPSJNMzAgMTVIMjVWNDVIMzBWMTVaIiBmaWxsPSIjOEI0NTEzIi8+CjwvcGF0aD4KPC9zdmc+'}
                     alt={product.name}
-                    style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }}
+                    style={{ width: 60, height: 60, objectFit: 'contain', backgroundColor: '#f5f5f5', borderRadius: 4 }}
+                    onError={(e) => {
+                      console.error('Image failed to load:', product.image);
+                      e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAyNUgxNVYzNUgyMFYyNVoiIGZpbGw9IiM4QjQ1MTMiLz4KPHA+dGggZD0iTTQ1IDI1SDQwVjM1SDQ1VjI1WiIgZmlsbD0iIzhCNDUxMyIvPgo8cGF0aCBkPSJNMzAgMTVIMjVWNDVIMzBWMTVaIiBmaWxsPSIjOEI0NTEzIi8+CjwvcGF0aD4KPC9zdmc+';
+                    }}
                   />
                 </TableCell>
                 <TableCell>
-                  <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                    {product.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {product.description?.substring(0, 50)}...
-                  </Typography>
+                  <Box>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold', fontSize: { xs: '0.875rem', sm: '1rem' } }}>
+                      {product.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ display: { xs: 'none', sm: 'block' } }}>
+                      {product.description?.substring(0, 50)}...
+                    </Typography>
+                    {/* Show category on mobile */}
+                    <Box sx={{ display: { xs: 'block', md: 'none' }, mt: 0.5 }}>
+                      <Chip
+                        label={product.category}
+                        size="small"
+                        sx={{ backgroundColor: '#8B4513', color: 'white', fontSize: '0.75rem' }}
+                      />
+                    </Box>
+                  </Box>
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
                   <Chip
                     label={product.category}
                     size="small"
                     sx={{ backgroundColor: '#8B4513', color: 'white' }}
                   />
                 </TableCell>
-                <TableCell>${product.price.toFixed(2)}</TableCell>
                 <TableCell>
+                  <Typography sx={{ fontWeight: 'bold', fontSize: { xs: '0.875rem', sm: '1rem' } }}>
+                    {formatPrice(product.price)}
+                  </Typography>
+                </TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                   <Chip
                     label={product.featured ? 'Yes' : 'No'}
                     color={product.featured ? 'success' : 'default'}
                     size="small"
                   />
                 </TableCell>
-                <TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                   <Chip
                     label={product.available !== false ? 'Yes' : 'No'}
                     color={product.available !== false ? 'success' : 'error'}
@@ -616,8 +756,26 @@ const Admin = () => {
     return (
       <Container sx={{ py: 4, textAlign: 'center' }}>
         <Alert severity="error">
-          Access denied. You must be an administrator to view this page.
+          Access denied. Admin privileges required.
         </Alert>
+        <Box sx={{ mt: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+          <Typography variant="h6" gutterBottom>Debug Info:</Typography>
+          <Typography variant="body2">User exists: {user ? 'Yes' : 'No'}</Typography>
+          <Typography variant="body2">User role: {user?.role || 'None'}</Typography>
+          <Typography variant="body2">Token exists: {localStorage.getItem('token') ? 'Yes' : 'No'}</Typography>
+
+          <Typography variant="body2">Please log in as admin using:</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Email: admin@webcaffe.com</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Password: password</Typography>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            sx={{ mt: 2 }}
+            onClick={() => window.location.href = '/login'}
+          >
+            Go to Login
+          </Button>
+        </Box>
       </Container>
     );
   }
@@ -628,10 +786,17 @@ const Admin = () => {
         variant="h3"
         component="h1"
         gutterBottom
-        sx={{ fontWeight: 'bold', color: '#8B4513', mb: 4 }}
+        sx={{ 
+          fontWeight: 'bold', 
+          color: '#8B4513', 
+          mb: 4,
+          fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
+        }}
       >
         Admin Dashboard
       </Typography>
+      
+
 
       {/* Error Display */}
       {error && (
@@ -732,30 +897,15 @@ const Admin = () => {
                 helperText={productTouched.description && productErrors.description}
               />
             </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Price"
-                type="number"
-                value={productForm.price}
-                onChange={(e) => handleProductFormChange('price', e.target.value)}
-                onBlur={() => handleProductFormBlur('price')}
-                error={productTouched.price && !!productErrors.price}
-                helperText={productTouched.price && productErrors.price}
-                InputProps={{
-                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
-                }}
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Image URL"
+            <Grid item xs={12}>
+              <Typography variant="subtitle2" gutterBottom sx={{ color: '#8B4513', fontWeight: 'bold' }}>
+                Product Image
+              </Typography>
+              <ImageUpload
                 value={productForm.image}
-                onChange={(e) => handleProductFormChange('image', e.target.value)}
-                onBlur={() => handleProductFormBlur('image')}
-                error={productTouched.image && !!productErrors.image}
-                helperText={(productTouched.image && productErrors.image) || (!productTouched.image && "Optional: Enter a valid image URL")}
+                onChange={(imagePath) => handleProductFormChange('image', imagePath)}
+                error={productTouched.image && productErrors.image}
+                helperText="Upload a high-quality image for your product"
               />
             </Grid>
             <Grid item xs={12} md={6}>
@@ -812,7 +962,7 @@ const Admin = () => {
               {productForm.sizes.map((size, index) => (
                 <Chip
                   key={index}
-                  label={`${size.name} - $${size.price.toFixed(2)}`}
+                  label={`${size.name} - ${formatPrice(size.price)}`}
                   onDelete={() => handleRemoveSize(index)}
                   sx={{ mr: 1, mb: 1 }}
                 />
@@ -858,16 +1008,24 @@ const Admin = () => {
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} md={6}>
-              <TextField
-                fullWidth
-                label="Size Name"
-                value={sizeForm.name}
-                onChange={(e) => handleSizeFormChange('name', e.target.value)}
-                onBlur={() => handleSizeFormBlur('name')}
-                error={sizeTouched.name && !!sizeErrors.name}
-                helperText={sizeTouched.name && sizeErrors.name}
-                placeholder="e.g., Small, Medium, Large"
-              />
+              <FormControl fullWidth error={sizeTouched.name && !!sizeErrors.name}>
+                <InputLabel>Size Name</InputLabel>
+                <Select
+                  value={sizeForm.name}
+                  label="Size Name"
+                  onChange={(e) => handleSizeFormChange('name', e.target.value)}
+                  onBlur={() => handleSizeFormBlur('name')}
+                >
+                  <MenuItem value="Small">Small</MenuItem>
+                  <MenuItem value="Medium">Medium</MenuItem>
+                  <MenuItem value="Large">Large</MenuItem>
+                </Select>
+                {sizeTouched.name && sizeErrors.name && (
+                  <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.5 }}>
+                    {sizeErrors.name}
+                  </Typography>
+                )}
+              </FormControl>
             </Grid>
             <Grid item xs={12} md={6}>
               <TextField
@@ -880,7 +1038,7 @@ const Admin = () => {
                 error={sizeTouched.price && !!sizeErrors.price}
                 helperText={sizeTouched.price && sizeErrors.price}
                 InputProps={{
-                  startAdornment: <InputAdornment position="start">$</InputAdornment>,
+                  endAdornment: <InputAdornment position="end">VNĐ</InputAdornment>,
                 }}
               />
             </Grid>
