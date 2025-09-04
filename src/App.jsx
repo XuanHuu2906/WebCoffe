@@ -16,7 +16,12 @@ import Profile from './pages/Profile.jsx';
 import Cart from './pages/Cart.jsx';
 import Orders from './pages/Orders.jsx';
 import Admin from './pages/Admin.jsx';
+import VNPayReturn from './pages/VNPayReturn.jsx';
 import MoMoReturn from './pages/MoMoReturn.jsx';
+import CheckoutResult from './pages/CheckoutResult.jsx';
+import PaymentResult from './pages/PaymentResult.jsx';
+import CardPayment from './pages/CardPayment.jsx';
+import CashPayment from './pages/CashPayment.jsx';
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
 import './App.css';
 
@@ -56,6 +61,10 @@ function App() {
                   <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
                   <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
                   <Route path="/momo/return" element={<MoMoReturn />} />
+                  <Route path="/vnpay/return" element={<VNPayReturn />} />
+                  <Route path="/checkout/result" element={<PaymentResult />} />
+                  <Route path="/payment/card" element={<CardPayment />} />
+                  <Route path="/payment/cash" element={<CashPayment />} />
                 </Routes>
               </Layout>
             </Router>

@@ -73,9 +73,7 @@ const Orders = () => {
           const mappedOrders = data.data.map(order => ({
             id: order.orderNumber,
             date: new Date(order.createdAt).toISOString().split('T')[0],
-            status: order.status === 'completed' ? 'delivered' : 
-                   order.status === 'preparing' || order.status === 'confirmed' ? 'processing' : 
-                   order.status,
+            status: order.status === 'completed' ? 'delivered' : order.status,
             total: order.total,
             items: order.items.map(item => ({
               name: item.name,
@@ -106,11 +104,16 @@ const Orders = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'delivered':
+      case 'completed':
         return 'success';
-      case 'processing':
+      case 'confirmed':
+      case 'preparing':
+      case 'ready':
         return 'warning';
       case 'cancelled':
         return 'error';
+      case 'pending':
+        return 'default';
       default:
         return 'default';
     }
@@ -119,11 +122,15 @@ const Orders = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'delivered':
+      case 'completed':
         return <CheckCircle />;
-      case 'processing':
+      case 'confirmed':
+      case 'preparing':
+      case 'ready':
         return <Schedule />;
       case 'cancelled':
         return <Cancel />;
+      case 'pending':
       default:
         return <LocalShipping />;
     }
@@ -193,9 +200,7 @@ const Orders = () => {
                     const mappedOrders = data.data.map(order => ({
                       id: order.orderNumber,
                       date: new Date(order.createdAt).toISOString().split('T')[0],
-                      status: order.status === 'completed' ? 'delivered' : 
-                             order.status === 'preparing' || order.status === 'confirmed' ? 'processing' : 
-                             order.status,
+                      status: order.status === 'completed' ? 'delivered' : order.status,
                       total: order.total,
                       items: order.items.map(item => ({
                         name: item.name,

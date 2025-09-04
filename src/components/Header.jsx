@@ -35,6 +35,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 
 const Header = () => {
+  const logo = '/images/Logo.png';
   const navigate = useNavigate();
   const { isAuthenticated, user, logout } = useAuth();
   const { itemCount } = useCart();
@@ -85,9 +86,19 @@ const Header = () => {
           color="inherit"
           aria-label="logo"
           onClick={() => navigate('/')}
-          sx={{ mr: 2 }}
+          sx={{ p: 0, mr: 1 }}             // bỏ padding mặc định để logo “to hơn” thật
         >
-          <Coffee fontSize="large" />
+          <Box
+            component="img"
+            src={logo}
+            alt="logo"
+            sx={{
+              height: { xs: 44, sm: 60, md: 72 }, // CHỈ tăng logo
+              width: 'auto',
+              display: 'block',
+              objectFit: 'contain'
+            }}
+          />
         </IconButton>
         
         <Typography
@@ -99,7 +110,7 @@ const Header = () => {
             fontSize: { xs: '1.1rem', sm: '1.25rem' }
           }}
         >
-          WebCaffe
+          DREAM COFFEE
         </Typography>
         
         {/* Desktop Navigation */}

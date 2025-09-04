@@ -194,8 +194,13 @@ export const ProductProvider = ({ children }) => {
   };
 
   // Clear filters
-  const clearFilters = () => {
+  const clearFilters = async () => {
     dispatch({ type: 'CLEAR_FILTERS' });
+    // Fetch products with cleared filters
+    return await fetchProducts({
+      page: 1,
+      limit: 12
+    });
   };
 
   // Search products
@@ -244,8 +249,8 @@ export const ProductProvider = ({ children }) => {
         },
       });
       
-      // Refresh products list after creation
-      await fetchProducts(state.filters);
+      // Refresh products list after creation with a high limit to ensure all products are fetched
+      await fetchProducts({...state.filters, limit: 100});
       
       return response.data;
     } catch (error) {
@@ -263,8 +268,8 @@ export const ProductProvider = ({ children }) => {
         },
       });
       
-      // Refresh products list after update
-      await fetchProducts(state.filters);
+      // Refresh products list after update with a high limit to ensure all products are fetched
+      await fetchProducts({...state.filters, limit: 100});
       
       return response.data;
     } catch (error) {
@@ -278,8 +283,8 @@ export const ProductProvider = ({ children }) => {
     try {
       const response = await axios.delete(`${API_BASE_URL}/products/${productId}`);
       
-      // Refresh products list after deletion
-      await fetchProducts(state.filters);
+      // Refresh products list after deletion with a high limit to ensure all products are fetched
+      await fetchProducts({...state.filters, limit: 100});
       
       return response.data;
     } catch (error) {

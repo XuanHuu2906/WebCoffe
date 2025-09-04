@@ -10,7 +10,6 @@ import {
 import {
   Facebook,
   Instagram,
-  Twitter,
   LocationOn,
   Phone,
   Email
@@ -29,44 +28,34 @@ const Footer = () => {
     >
       <Container maxWidth="lg">
         <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={8}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              WebCaffe
+              DREAM COFFEE
             </Typography>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              Your favorite coffee shop serving the finest coffee and pastries
-              in a cozy atmosphere. Come and enjoy our handcrafted beverages.
+             Quán cà phê yêu thích của bạn phục vụ cà phê và bánh ngọt ngon nhất trong không gian ấm cúng. Hãy đến và thưởng thức đồ uống làm thủ công của chúng tôi.
             </Typography>
             <Box>
-              <IconButton color="inherit" aria-label="Facebook">
+              <IconButton 
+                color="inherit" 
+                aria-label="Facebook" 
+                component="a" 
+                href="https://www.facebook.com/profile.php?id=61563937649575" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
                 <Facebook />
               </IconButton>
-              <IconButton color="inherit" aria-label="Instagram">
+              <IconButton 
+                color="inherit" 
+                aria-label="Instagram" 
+                component="a" 
+                href="https://www.instagram.com/dream_coffee97/?hl=en" 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
                 <Instagram />
               </IconButton>
-              <IconButton color="inherit" aria-label="Twitter">
-                <Twitter />
-              </IconButton>
-            </Box>
-          </Grid>
-          
-          <Grid item xs={12} md={4}>
-            <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>
-              Quick Links
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-              <Link href="/" color="inherit" underline="hover">
-                Home
-              </Link>
-              <Link href="/menu" color="inherit" underline="hover">
-                Menu
-              </Link>
-              <Link href="/about" color="inherit" underline="hover">
-                About Us
-              </Link>
-              <Link href="/contact" color="inherit" underline="hover">
-                Contact
-              </Link>
             </Box>
           </Grid>
           
@@ -78,19 +67,19 @@ const Footer = () => {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <LocationOn fontSize="small" />
                 <Typography variant="body2">
-                  123 Coffee Street, City, State 12345
+                  97 Man Thiện, Hiệp Phú, Thủ Đức, Hồ Chí Minh
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Phone fontSize="small" />
                 <Typography variant="body2">
-                  (555) 123-4567
+                  0837055076
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Email fontSize="small" />
                 <Typography variant="body2">
-                  info@webcaffe.com
+                  dreamcoffee@gmail.com
                 </Typography>
               </Box>
             </Box>
@@ -106,7 +95,7 @@ const Footer = () => {
           }}
         >
           <Typography variant="body2">
-            © 2024 WebCaffe. All rights reserved.
+            © 2025 Dream Coffee. All rights reserved.
           </Typography>
         </Box>
       </Container>

@@ -46,7 +46,14 @@ import {
   Assessment,
   Save,
   Cancel,
-  Search
+  Search,
+  ShoppingCart,
+  Person,
+  CheckCircle,
+  Cancel as CancelIcon,
+  Pending,
+  LocalShipping,
+  Done
 } from '@mui/icons-material';
 import { useProducts } from '../contexts/ProductContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -93,6 +100,23 @@ const Admin = () => {
   });
   const [dashboardLoading, setDashboardLoading] = useState(false);
   const [dashboardError, setDashboardError] = useState(null);
+
+  // Order management states
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState(null);
+  const [orderSearchTerm, setOrderSearchTerm] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('all');
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [showOrderDialog, setShowOrderDialog] = useState(false);
+
+  // Customer management states
+  const [customers, setCustomers] = useState([]);
+  const [customersLoading, setCustomersLoading] = useState(false);
+  const [customersError, setCustomersError] = useState(null);
+  const [customerSearchTerm, setCustomerSearchTerm] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [showCustomerDialog, setShowCustomerDialog] = useState(false);
 
   // Fetch dashboard statistics
   const fetchDashboardStats = async () => {
@@ -167,13 +191,150 @@ const Admin = () => {
     }
   };
 
+  // Fetch orders
+  const fetchOrders = async (page = 1, limit = 10) => {
+    setOrdersLoading(true);
+    setOrdersError(null);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString()
+      });
+
+      if (orderStatusFilter && orderStatusFilter !== 'all') {
+        params.append('status', orderStatusFilter);
+      }
+
+      if (orderSearchTerm) {
+        params.append('search', orderSearchTerm);
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/orders?${params}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setOrders(data.data.orders);
+      }
+    } catch (error) {
+      console.error('Error fetching orders:', error);
+      setOrdersError(error.message);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  // Fetch customers
+  const fetchCustomers = async (page = 1, limit = 10) => {
+    setCustomersLoading(true);
+    setCustomersError(null);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString()
+      });
+
+      if (customerSearchTerm) {
+        params.append('search', customerSearchTerm);
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/customers?${params}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch customers');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setCustomers(data.data.customers);
+      }
+    } catch (error) {
+      console.error('Error fetching customers:', error);
+      setCustomersError(error.message);
+    } finally {
+      setCustomersLoading(false);
+    }
+  };
+
+  // Update order status
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication required');
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/orders/${orderId}/status`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update order status');
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        // Refresh orders list
+        fetchOrders();
+        setError(null);
+      }
+    } catch (error) {
+      console.error('Error updating order status:', error);
+      setError(error.message);
+    }
+  };
+
   useEffect(() => {
-    fetchProducts();
+    fetchProducts({ limit: 100 }); // Fetch all products without pagination limit
     if (user && user.role === 'admin') {
       fetchDashboardStats();
       fetchRecentOrders();
     }
   }, [user]);
+
+  // Fetch orders when tab changes to orders or filters change
+  useEffect(() => {
+    if (currentTab === 2 && user && user.role === 'admin') {
+      fetchOrders();
+    }
+  }, [currentTab, orderStatusFilter, orderSearchTerm]);
+
+  // Fetch customers when tab changes to customers or search changes
+  useEffect(() => {
+    if (currentTab === 3 && user && user.role === 'admin') {
+      fetchCustomers();
+    }
+  }, [currentTab, customerSearchTerm]);
 
   // Handle tab change
   const handleTabChange = (event, newValue) => {
@@ -352,6 +513,9 @@ const Admin = () => {
 
   // Handle edit product
   const handleEditProduct = (product) => {
+    // Fetch all products first to ensure we have the complete list
+    fetchProducts({ limit: 100 });
+    
     setEditingProduct(product);
     setProductForm({
       name: product.name,
@@ -645,7 +809,11 @@ const Admin = () => {
         <Button
           variant="contained"
           startIcon={<Add />}
-          onClick={() => setShowProductDialog(true)}
+          onClick={() => {
+            // Fetch all products first to ensure we have the complete list
+            fetchProducts({ limit: 100 });
+            setShowProductDialog(true);
+          }}
           sx={{
             backgroundColor: '#8B4513',
             '&:hover': { backgroundColor: '#A0522D' }
@@ -751,6 +919,236 @@ const Admin = () => {
     </Box>
   );
 
+  // Orders Tab Component
+  const OrdersTab = () => (
+    <Box>
+      {/* Search and Filter */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+        <TextField
+          placeholder="Search orders..."
+          value={orderSearchTerm}
+          onChange={(e) => setOrderSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: { xs: '100%', sm: 300 } }}
+        />
+        <FormControl sx={{ minWidth: 120 }}>
+          <InputLabel>Status</InputLabel>
+          <Select
+            value={orderStatusFilter}
+            label="Status"
+            onChange={(e) => setOrderStatusFilter(e.target.value)}
+          >
+            <MenuItem value="all">All</MenuItem>
+            <MenuItem value="pending">Pending</MenuItem>
+            <MenuItem value="confirmed">Confirmed</MenuItem>
+            <MenuItem value="preparing">Preparing</MenuItem>
+            <MenuItem value="ready">Ready</MenuItem>
+            <MenuItem value="delivered">Delivered</MenuItem>
+            <MenuItem value="cancelled">Cancelled</MenuItem>
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* Orders Table */}
+      {ordersLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress sx={{ color: '#8B4513' }} />
+        </Box>
+      ) : ordersError ? (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {ordersError}
+        </Alert>
+      ) : (
+        <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: { xs: 600, md: 800 } }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Order #</TableCell>
+                <TableCell>Customer</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Items</TableCell>
+                <TableCell>Total</TableCell>
+                <TableCell>Status</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Date</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {orders.map((order) => (
+                <TableRow key={order._id}>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                      #{order.orderNumber || order._id.slice(-6)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                        {order.user?.name || order.customerInfo?.name || 'Unknown'}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {order.user?.email || order.customerInfo?.email || 'No email'}
+                      </Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                    <Typography variant="body2">
+                      {order.items?.length || 0} items
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                      {formatPrice(order.total)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Chip
+                      label={order.status}
+                      size="small"
+                      icon={
+                        order.status === 'delivered' ? <CheckCircle /> :
+                        order.status === 'cancelled' ? <Cancel /> :
+                        order.status === 'ready' ? <Done /> :
+                        order.status === 'preparing' ? <LocalShipping /> :
+                        <Pending />
+                      }
+                      color={
+                        order.status === 'delivered' ? 'success' :
+                        order.status === 'cancelled' ? 'error' :
+                        order.status === 'ready' ? 'info' :
+                        order.status === 'preparing' ? 'warning' :
+                        'default'
+                      }
+                    />
+                  </TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                    <Typography variant="body2">
+                      {new Date(order.createdAt).toLocaleDateString()}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setSelectedOrder(order);
+                        setShowOrderDialog(true);
+                      }}
+                      sx={{ color: '#8B4513' }}
+                    >
+                      <Visibility />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+    </Box>
+  );
+
+  // Customers Tab Component
+  const CustomersTab = () => (
+    <Box>
+      {/* Search */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <TextField
+          placeholder="Search customers..."
+          value={customerSearchTerm}
+          onChange={(e) => setCustomerSearchTerm(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          sx={{ width: { xs: '100%', sm: 300 } }}
+        />
+      </Box>
+
+      {/* Customers Table */}
+      {customersLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress sx={{ color: '#8B4513' }} />
+        </Box>
+      ) : customersError ? (
+        <Alert severity="error" sx={{ mb: 3 }}>
+          {customersError}
+        </Alert>
+      ) : (
+        <TableContainer component={Paper} sx={{ overflowX: 'auto' }}>
+          <Table sx={{ minWidth: { xs: 600, md: 750 } }}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Name</TableCell>
+                <TableCell>Email</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Phone</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Orders</TableCell>
+                <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>Total Spent</TableCell>
+                <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>Joined</TableCell>
+                <TableCell>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {customers.map((customer) => (
+                <TableRow key={customer._id}>
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                      {customer.name}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body2">
+                      {customer.email}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                    <Typography variant="body2">
+                      {customer.phone || 'N/A'}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                    <Typography variant="body2">
+                      {customer.orderCount || 0}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
+                    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                      {formatPrice(customer.totalSpent || 0)}
+                    </Typography>
+                  </TableCell>
+                  <TableCell sx={{ display: { xs: 'none', md: 'table-cell' } }}>
+                    <Typography variant="body2">
+                      {new Date(customer.createdAt).toLocaleDateString()}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setSelectedCustomer(customer);
+                        setShowCustomerDialog(true);
+                      }}
+                      sx={{ color: '#8B4513' }}
+                    >
+                      <Visibility />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
+    </Box>
+  );
+
   // Check if user is admin
   if (!user || user.role !== 'admin') {
     return (
@@ -829,12 +1227,16 @@ const Admin = () => {
         >
           <Tab label="Dashboard" icon={<Dashboard />} />
           <Tab label="Products" icon={<Inventory />} />
+          <Tab label="Orders" icon={<ShoppingCart />} />
+          <Tab label="Customers" icon={<People />} />
         </Tabs>
       </Paper>
 
       {/* Tab Content */}
       {currentTab === 0 && <DashboardTab />}
       {currentTab === 1 && <ProductsTab />}
+      {currentTab === 2 && <OrdersTab />}
+      {currentTab === 3 && <CustomersTab />}
 
       {/* Add/Edit Product Dialog */}
       <Dialog
@@ -1060,6 +1462,198 @@ const Admin = () => {
             }}
           >
             Add Size
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Order Details Dialog */}
+      <Dialog
+        open={showOrderDialog}
+        onClose={() => {
+          setShowOrderDialog(false);
+          setSelectedOrder(null);
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          Order Details - #{selectedOrder?.orderNumber || selectedOrder?._id?.slice(-6)}
+        </DialogTitle>
+        <DialogContent>
+          {selectedOrder && (
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12} md={6}>
+                <Typography variant="h6" gutterBottom>Customer Information</Typography>
+                <Typography><strong>Name:</strong> {selectedOrder.user?.name || selectedOrder.customerInfo?.name || 'Unknown'}</Typography>
+                <Typography><strong>Email:</strong> {selectedOrder.user?.email || selectedOrder.customerInfo?.email || 'No email'}</Typography>
+                <Typography><strong>Phone:</strong> {selectedOrder.customerInfo?.phone || 'N/A'}</Typography>
+                <Typography><strong>Address:</strong> {selectedOrder.customerInfo?.address || 'N/A'}</Typography>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Typography variant="h6" gutterBottom>Order Information</Typography>
+                <Typography><strong>Status:</strong> 
+                  <Chip
+                    label={selectedOrder.status}
+                    size="small"
+                    color={
+                      selectedOrder.status === 'delivered' ? 'success' :
+                      selectedOrder.status === 'cancelled' ? 'error' :
+                      selectedOrder.status === 'ready' ? 'info' :
+                      selectedOrder.status === 'preparing' ? 'warning' :
+                      'default'
+                    }
+                    sx={{ ml: 1 }}
+                  />
+                </Typography>
+                <Typography><strong>Total:</strong> {formatPrice(selectedOrder.total)}</Typography>
+                <Typography><strong>Payment Method:</strong> {selectedOrder.paymentMethod || 'N/A'}</Typography>
+                <Typography><strong>Order Date:</strong> {new Date(selectedOrder.createdAt).toLocaleString()}</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom>Order Items</Typography>
+                <TableContainer component={Paper}>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Product</TableCell>
+                        <TableCell>Size</TableCell>
+                        <TableCell>Quantity</TableCell>
+                        <TableCell>Price</TableCell>
+                        <TableCell>Total</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {selectedOrder.items?.map((item, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{item.product?.name || item.name || 'Unknown Product'}</TableCell>
+                          <TableCell>{item.size || 'N/A'}</TableCell>
+                          <TableCell>{item.quantity}</TableCell>
+                          <TableCell>{formatPrice(item.price)}</TableCell>
+                          <TableCell>{formatPrice(item.price * item.quantity)}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom>Update Order Status</Typography>
+                <FormControl fullWidth>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={selectedOrder.status}
+                    label="Status"
+                    onChange={(e) => {
+                      updateOrderStatus(selectedOrder._id, e.target.value);
+                      setSelectedOrder({ ...selectedOrder, status: e.target.value });
+                    }}
+                  >
+                    <MenuItem value="pending">Pending</MenuItem>
+                    <MenuItem value="confirmed">Confirmed</MenuItem>
+                    <MenuItem value="preparing">Preparing</MenuItem>
+                    <MenuItem value="ready">Ready</MenuItem>
+                    <MenuItem value="delivered">Delivered</MenuItem>
+                    <MenuItem value="cancelled">Cancelled</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setShowOrderDialog(false);
+              setSelectedOrder(null);
+            }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Customer Details Dialog */}
+      <Dialog
+        open={showCustomerDialog}
+        onClose={() => {
+          setShowCustomerDialog(false);
+          setSelectedCustomer(null);
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          Customer Details - {selectedCustomer?.name}
+        </DialogTitle>
+        <DialogContent>
+          {selectedCustomer && (
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12} md={6}>
+                <Typography variant="h6" gutterBottom>Personal Information</Typography>
+                <Typography><strong>Name:</strong> {selectedCustomer.name}</Typography>
+                <Typography><strong>Email:</strong> {selectedCustomer.email}</Typography>
+                <Typography><strong>Phone:</strong> {selectedCustomer.phone || 'N/A'}</Typography>
+                <Typography><strong>Member Since:</strong> {new Date(selectedCustomer.createdAt).toLocaleDateString()}</Typography>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <Typography variant="h6" gutterBottom>Order Statistics</Typography>
+                <Typography><strong>Total Orders:</strong> {selectedCustomer.orderCount || 0}</Typography>
+                <Typography><strong>Total Spent:</strong> {formatPrice(selectedCustomer.totalSpent || 0)}</Typography>
+                <Typography><strong>Average Order Value:</strong> {formatPrice((selectedCustomer.totalSpent || 0) / Math.max(selectedCustomer.orderCount || 1, 1))}</Typography>
+                <Typography><strong>Last Order:</strong> {selectedCustomer.lastOrderDate ? new Date(selectedCustomer.lastOrderDate).toLocaleDateString() : 'N/A'}</Typography>
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="h6" gutterBottom>Recent Orders</Typography>
+                {selectedCustomer.recentOrders && selectedCustomer.recentOrders.length > 0 ? (
+                  <TableContainer component={Paper}>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Order #</TableCell>
+                          <TableCell>Date</TableCell>
+                          <TableCell>Total</TableCell>
+                          <TableCell>Status</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {selectedCustomer.recentOrders.map((order) => (
+                          <TableRow key={order._id}>
+                            <TableCell>#{order.orderNumber || order._id.slice(-6)}</TableCell>
+                            <TableCell>{new Date(order.createdAt).toLocaleDateString()}</TableCell>
+                            <TableCell>{formatPrice(order.total)}</TableCell>
+                            <TableCell>
+                              <Chip
+                                label={order.status}
+                                size="small"
+                                color={
+                                  order.status === 'delivered' ? 'success' :
+                                  order.status === 'cancelled' ? 'error' :
+                                  order.status === 'ready' ? 'info' :
+                                  order.status === 'preparing' ? 'warning' :
+                                  'default'
+                                }
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                ) : (
+                  <Typography color="text.secondary">No recent orders found.</Typography>
+                )}
+              </Grid>
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setShowCustomerDialog(false);
+              setSelectedCustomer(null);
+            }}
+          >
+            Close
           </Button>
         </DialogActions>
       </Dialog>
