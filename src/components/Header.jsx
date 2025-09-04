@@ -286,7 +286,7 @@ const Header = () => {
           <Box sx={{ width: 250, pt: 2 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', px: 2, mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#8B4513' }}>
-                WebCaffe
+                DREAM COFFEE
               </Typography>
               <IconButton onClick={() => setMobileMenuOpen(false)}>
                 <Close />

@@ -46,8 +46,8 @@ const About = () => {
 
   const faqs = [
     {
-      question: 'Là gì DREAM COFFEE?',
-      answer: 'DREAM COFFEE là một quán cà phê chuyên nghiệp, cung cấp những hạt cà phê chất lượng cao, được pha chế từ những người nông dân uy tín. Chúng tôi cam kết mang đến cho khách hàng những trải nghiệm tuyệt vời nhất, từ những hạt cà phê thơm ngon đến những bữa tiệc đậm đà.'
+      question: 'DREAM COFFEE là gì?',
+      answer: 'DREAM COFFEE là một quán cà phê chuyên nghiệp, cung cấp những hạt cà phê chất lượng cao, cung cấp nguyên liệu từ những người nông dân uy tín. Chúng tôi cam kết mang đến cho khách hàng những trải nghiệm tuyệt vời nhất, từ những hạt cà phê thơm ngon đến những bữa tiệc đậm đà.'
     },
     {
       question: 'Dịch vụ nào DREAM COFFEE mang lại?',
@@ -72,7 +72,7 @@ const About = () => {
       {/* Brand Story Section */}
       <Container maxWidth="lg" sx={{ py: 8 }}>
         <Typography variant="h3" component="h2" textAlign="center" gutterBottom>
-          Giới thiệu về Wynchanne
+          Giới thiệu về DREAM COFFEE
         </Typography>
         <Grid container spacing={6} alignItems="center">
           <Grid item xs={12} md={6}>

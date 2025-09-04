@@ -1,18 +1,21 @@
 {
-  "name": "webcaffe-frontend",
+  "name": "dreamcoffee-frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "author": "WebCaffe Team",
-  "description": "Frontend application for WebCaffe - A modern coffee shop management system",
+  "author": "DREAM COFFEE Team",
+  "description": "Frontend application for DREAM COFFEE - A modern coffee shop management system",
   "engines": {
     "node": ">=18.x"
   },
   "scripts": {
-    "dev": "cross-env BUILD_MODE=dev vite --host",
-    "build": "cross-env BUILD_MODE=production vite build --base=./",
+    "dev": "vite --mode development --host",
+    "dev:prod": "vite --mode production --host",
+    "build": "vite build --mode production --base=./",
+    "build:dev": "vite build --mode development --base=./",
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview --mode production",
+    "preview:dev": "vite preview --mode development"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.0.8",
@@ -20,10 +23,12 @@
     "@dnd-kit/utilities": "^3.2.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@mlc-ai/web-llm": "^0.2.79",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.17.1",
     "axios": "^1.5.1",
     "cross-env": "^7.0.3",
+    "fuse.js": "^7.1.0",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

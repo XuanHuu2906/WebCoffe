@@ -114,7 +114,7 @@ const initialState = {
 };
 
 // Cart storage utilities
-const CART_STORAGE_KEY = 'webcaffe_cart';
+const CART_STORAGE_KEY = 'dreamcoffee_cart';
 const CART_VERSION = '1.0';
 const CART_EXPIRY_DAYS = 7; // Cart expires after 7 days
 
