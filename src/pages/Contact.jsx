@@ -744,7 +744,7 @@ const Contact = () => {
                 letterSpacing: '-0.02em'
               }}
             >
-              Contact Us
+              Liên Hệ
             </Typography>
             <Box
               sx={{
@@ -768,7 +768,7 @@ const Contact = () => {
                 textShadow: '0 2px 4px rgba(0,0,0,0.2)'
               }}
             >
-              We're here to help with your coffee needs, orders, and inquiries
+              Chúng tôi luôn sẵn sàng hỗ trợ bạn với các nhu cầu về cà phê, đơn hàng và thắc mắc
             </Typography>
           </Box>
           
@@ -796,7 +796,7 @@ const Contact = () => {
               >
                 <Phone sx={{ fontSize: '3rem', mb: 2, color: '#F4A460' }} />
                 <Typography variant="h6" sx={{ color: 'white', fontWeight: 600, mb: 1 }}>
-                  Call Us
+                  Gọi Cho Chúng Tôi
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
                   +84 28 1234 5678
@@ -825,7 +825,7 @@ const Contact = () => {
               >
                 <Email sx={{ fontSize: '3rem', mb: 2, color: '#F4A460' }} />
                 <Typography variant="h6" sx={{ color: 'white', fontWeight: 600, mb: 1 }}>
-                  Email Us
+                  Gửi Email
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
                   hello@webcaffe.com
@@ -854,10 +854,10 @@ const Contact = () => {
               >
                 <LocationOn sx={{ fontSize: '3rem', mb: 2, color: '#F4A460' }} />
                 <Typography variant="h6" sx={{ color: 'white', fontWeight: 600, mb: 1 }}>
-                  Visit Us
+                  Ghé Thăm
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  123 Coffee Street, District 1
+                  123 Đường Cà Phê, Quận 1
                 </Typography>
               </Card>
             </Grid>
@@ -873,13 +873,13 @@ const Contact = () => {
             <Card sx={{ height: '100%' }}>
               <CardContent>
                 <Typography variant="h5" gutterBottom color="primary">
-                  Get in Touch
+                  Thông Tin Liên Hệ
                 </Typography>
                 
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="h6" gutterBottom>
                     <Phone sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    Hotline
+                    Đường Dây Nóng
                   </Typography>
                   <Typography variant="body1" sx={{ mb: 1 }}>
                     <a href="tel:+842812345678" style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -887,10 +887,10 @@ const Contact = () => {
                     </a>
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Mon-Fri: 6:00 AM - 8:00 PM (GMT+7)
+                    Thứ 2 - Thứ 6: 6:00 - 20:00 (GMT+7)
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Sat-Sun: 7:00 AM - 7:00 PM (GMT+7)
+                    Thứ 7 - Chủ Nhật: 7:00 - 19:00 (GMT+7)
                   </Typography>
                 </Box>
 
@@ -899,22 +899,22 @@ const Contact = () => {
                 <Box sx={{ mb: 3 }}>
                   <Typography variant="h6" gutterBottom>
                     <Email sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    Email Contacts
+                    Liên Hệ Email
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>General:</strong> <a href="mailto:hello@webcaffe.com">hello@webcaffe.com</a>
+                    <strong>Chung:</strong> <a href="mailto:hello@webcaffe.com">hello@webcaffe.com</a>
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Orders:</strong> <a href="mailto:orders@webcaffe.com">orders@webcaffe.com</a>
+                    <strong>Đơn hàng:</strong> <a href="mailto:orders@webcaffe.com">orders@webcaffe.com</a>
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Wholesale:</strong> <a href="mailto:wholesale@webcaffe.com">wholesale@webcaffe.com</a>
+                    <strong>Bán sỉ:</strong> <a href="mailto:wholesale@webcaffe.com">wholesale@webcaffe.com</a>
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Press:</strong> <a href="mailto:press@webcaffe.com">press@webcaffe.com</a>
+                    <strong>Báo chí:</strong> <a href="mailto:press@webcaffe.com">press@webcaffe.com</a>
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Careers:</strong> <a href="mailto:careers@webcaffe.com">careers@webcaffe.com</a>
+                    <strong>Tuyển dụng:</strong> <a href="mailto:careers@webcaffe.com">careers@webcaffe.com</a>
                   </Typography>
                 </Box>
 
@@ -923,19 +923,19 @@ const Contact = () => {
                 <Box>
                   <Typography variant="h6" gutterBottom>
                     <AccessTime sx={{ mr: 1, verticalAlign: 'middle' }} />
-                    Response Times
+                    Thời Gian Phản Hồi
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Orders:</strong> &lt; 12 hours
+                    <strong>Đơn hàng:</strong> &lt; 12 giờ
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Events:</strong> 24-48 hours
+                    <strong>Sự kiện:</strong> 24-48 giờ
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Press:</strong> 4 hours (business days)
+                    <strong>Báo chí:</strong> 4 giờ (ngày làm việc)
                   </Typography>
                   <Typography variant="body2">
-                    <strong>General:</strong> 24-48 hours
+                    <strong>Chung:</strong> 24-48 giờ
                   </Typography>
                 </Box>
               </CardContent>
@@ -959,10 +959,10 @@ const Contact = () => {
                 textAlign: 'center'
               }}>
                 <Typography variant="h4" gutterBottom sx={{ fontWeight: 'bold' }}>
-                  📍 Visit Our Coffee Haven
+                  📍 Ghé Thăm Thiên Đường Cà Phê
                 </Typography>
                 <Typography variant="subtitle1" sx={{ opacity: 0.9 }}>
-                  Experience premium coffee in the heart of Ho Chi Minh City
+                  Trải nghiệm cà phê cao cấp tại trung tâm Thành phố Hồ Chí Minh
                 </Typography>
               </Box>
               
@@ -1003,7 +1003,7 @@ const Contact = () => {
                               }}
                               href={`tel:${location.phone}`}
                             >
-                              Call Now
+                              Gọi Ngay
                             </Button>
 
                             <Button 
@@ -1018,7 +1018,7 @@ const Contact = () => {
                                 alert('Address copied to clipboard!');
                               }}
                             >
-                              Copy Address
+                              Sao Chép Địa Chỉ
                             </Button>
                           </Box>
                         </Card>
@@ -1042,7 +1042,7 @@ const Contact = () => {
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
                               <Schedule sx={{ color: '#8B4513', mr: 1 }} />
                               <Typography variant="h6" sx={{ color: '#8B4513', fontWeight: 'bold' }}>
-                                Opening Hours
+                                Giờ Mở Cửa
                               </Typography>
                             </Box>
                           </AccordionSummary>
@@ -1058,14 +1058,14 @@ const Contact = () => {
                               ))}
                             </Grid>
                             <Typography variant="caption" sx={{ color: '#666', fontStyle: 'italic', mt: 2, display: 'block' }}>
-                              * All times in GMT+7 (ICT) • Closed on major holidays
+                              * Tất cả thời gian theo GMT+7 (ICT) • Đóng cửa vào các ngày lễ lớn
                             </Typography>
                           </AccordionDetails>
                         </Accordion>
 
                         <Box>
                           <Typography variant="h6" sx={{ mb: 2, color: '#8B4513', fontWeight: 'bold' }}>
-                            ✨ Amenities & Features
+                            ✨ Tiện Nghi & Đặc Điểm
                           </Typography>
                           <Grid container spacing={1}>
                             {location.amenities.map((amenity) => (
@@ -1107,7 +1107,7 @@ const Contact = () => {
                         textAlign: 'center'
                       }}>
                         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                          🗺️ Find Us on the Map
+                          🗺️ Tìm Chúng Tôi Trên Bản Đồ
                         </Typography>
                       </Box>
                       
@@ -1183,7 +1183,7 @@ const Contact = () => {
                   mb: 2
                 }}
               >
-                💬 Get in Touch
+                💬 Liên Hệ Với Chúng Tôi
               </Typography>
               <Box
                 sx={{
@@ -1206,7 +1206,7 @@ const Contact = () => {
                   textShadow: '0 1px 2px rgba(0,0,0,0.2)'
                 }}
               >
-                We'd love to hear from you. Choose your topic and we'll respond promptly.
+                Chúng tôi rất mong nhận được phản hồi từ bạn. Hãy chọn chủ đề và chúng tôi sẽ phản hồi nhanh chóng.
               </Typography>
             </Box>
           </Box>
@@ -1234,7 +1234,7 @@ const Contact = () => {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Full Name *"
+                    label="Họ Tên *"
                     name="fullName"
                     value={formData.fullName}
                     onChange={handleChange}
@@ -1300,7 +1300,7 @@ const Contact = () => {
                     onBlur={handleBlur}
                     error={touched.email && !!errors.email}
                     helperText={touched.email && errors.email}
-                    inputProps={{ 'aria-label': 'Email Address' }}
+                    inputProps={{ 'aria-label': 'Địa chỉ Email' }}
                     variant="outlined"
                     sx={{
                       '& .MuiOutlinedInput-root': {
@@ -1351,7 +1351,7 @@ const Contact = () => {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="Phone Number *"
+                    label="Số Điện Thoại *"
                     name="phone"
                     type="tel"
                     value={formData.phone}
@@ -1359,7 +1359,7 @@ const Contact = () => {
                     onBlur={handleBlur}
                     error={touched.phone && !!errors.phone}
                     helperText={touched.phone && errors.phone}
-                    inputProps={{ 'aria-label': 'Phone Number' }}
+                    inputProps={{ 'aria-label': 'Số Điện Thoại' }}
                     variant="outlined"
                     sx={{
                       '& .MuiOutlinedInput-root': {
@@ -1398,14 +1398,14 @@ const Contact = () => {
                       },
                     }}
                   >
-                    <InputLabel>Topic *</InputLabel>
+                    <InputLabel>Chủ Đề *</InputLabel>
                     <Select
                       name="topic"
                       value={formData.topic}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      label="Topic *"
-                      aria-label="Select Topic"
+                      label="Chủ Đề *"
+                      aria-label="Chọn Chủ Đề"
                     >
                       {topics.map((topic) => (
                         <MenuItem key={topic.value} value={topic.value}>
@@ -1430,7 +1430,7 @@ const Contact = () => {
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Message *"
+                    label="Tin Nhắn *"
                     name="message"
                     multiline
                     rows={5}
@@ -1438,8 +1438,8 @@ const Contact = () => {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     error={touched.message && !!errors.message}
-                    helperText={touched.message && errors.message || 'Minimum 20 characters'}
-                    inputProps={{ 'aria-label': 'Message', minLength: 20 }}
+                    helperText={touched.message && errors.message || 'Tối thiểu 20 ký tự'}
+                    inputProps={{ 'aria-label': 'Tin Nhắn', minLength: 20 }}
                     variant="outlined"
                     sx={{
                       '& .MuiOutlinedInput-root': {
@@ -1483,11 +1483,11 @@ const Contact = () => {
                           },
                         }}
                       >
-                        Attach Files
+                        Đính Kèm Tệp
                       </Button>
                     </label>
                     <Typography variant="caption" display="block" sx={{ mt: 1, color: 'text.secondary' }}>
-                      JPG, PNG, PDF files up to 5MB each
+                      Tệp JPG, PNG, PDF tối đa 5MB mỗi tệp
                     </Typography>
                   </Box>
                   
@@ -1538,7 +1538,7 @@ const Contact = () => {
                     }
                     label={
                       <Typography variant="body2" sx={{ color: 'text.primary' }}>
-                        I agree to the processing of my personal data for the purpose of responding to my inquiry. *
+                        Tôi đồng ý với việc xử lý dữ liệu cá nhân của tôi cho mục đích phản hồi yêu cầu của tôi. *
                       </Typography>
                     }
                     sx={{ mt: 1 }}
@@ -1610,7 +1610,7 @@ const Contact = () => {
                         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}
                     >
-                      {loading ? 'Sending Message...' : 'Send Message'}
+                      {loading ? 'Đang gửi tin nhắn...' : 'Gửi Tin Nhắn'}
                     </Button>
                   </Box>
                 </Grid>
@@ -1652,7 +1652,7 @@ const Contact = () => {
                 mb: 2
               }}
             >
-              Frequently Asked Questions
+              Câu Hỏi Thường Gặp
             </Typography>
             <Box
               sx={{
@@ -1673,7 +1673,7 @@ const Contact = () => {
                 mx: 'auto'
               }}
             >
-              Find quick answers to common questions about our services
+              Tìm câu trả lời nhanh cho các câu hỏi phổ biến về dịch vụ của chúng tôi
             </Typography>
           </Box>
           <Grid container spacing={3}>
@@ -1705,12 +1705,12 @@ const Contact = () => {
                   }}>
                   <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <HelpOutline color="primary" />
-                    What are your opening hours?
+                    Giờ mở cửa của quán là khi nào?
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Typography>
-                    We're open Monday-Friday 6:00 AM - 8:00 PM, and weekends 7:00 AM - 7:00 PM. Our kitchen closes 30 minutes before closing time.
+                    Chúng tôi mở cửa từ Thứ Hai đến Thứ Sáu 6:00 - 20:00, và cuối tuần 7:00 - 19:00. Bếp của chúng tôi đóng cửa 30 phút trước giờ đóng cửa.
                   </Typography>
                 </AccordionDetails>
               </Accordion>
@@ -1719,12 +1719,12 @@ const Contact = () => {
                 <AccordionSummary expandIcon={<ExpandMore />} sx={{ bgcolor: 'rgba(139, 69, 19, 0.05)' }}>
                   <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <ShoppingCart color="primary" />
-                    How can I track my order?
+                    Làm thế nào để theo dõi đơn hàng của tôi?
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Typography>
-                    You can track your order using the "Track Order" button above, or call us directly. You'll receive SMS updates for online orders.
+                    Bạn có thể theo dõi đơn hàng bằng cách sử dụng nút "Theo Dõi Đơn Hàng" ở trên, hoặc gọi trực tiếp cho chúng tôi. Bạn sẽ nhận được cập nhật qua SMS cho các đơn hàng trực tuyến.
                   </Typography>
                 </AccordionDetails>
               </Accordion>
@@ -1733,12 +1733,12 @@ const Contact = () => {
                 <AccordionSummary expandIcon={<ExpandMore />} sx={{ bgcolor: 'rgba(139, 69, 19, 0.05)' }}>
                   <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <LocalParking color="primary" />
-                    Is parking available?
+                    Có chỗ đậu xe không?
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Typography>
-                    Yes! We offer free parking for customers. We have 20 spots available, including 2 accessible parking spaces.
+                    Có! Chúng tôi cung cấp bãi đậu xe miễn phí cho khách hàng. Chúng tôi có 20 chỗ đậu xe, bao gồm 2 chỗ đậu xe dành cho người khuyết tật.
                   </Typography>
                 </AccordionDetails>
               </Accordion>
@@ -1749,12 +1749,12 @@ const Contact = () => {
                 <AccordionSummary expandIcon={<ExpandMore />} sx={{ bgcolor: 'rgba(139, 69, 19, 0.05)' }}>
                   <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Event color="primary" />
-                    Can I book events here?
+                    Tôi có thể đặt tổ chức sự kiện tại đây không?
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Typography>
-                    Absolutely! We host private events, meetings, and celebrations. Contact us at least 48 hours in advance for bookings.
+                    Tất nhiên! Chúng tôi tổ chức các sự kiện riêng tư, cuộc họp và lễ kỷ niệm. Vui lòng liên hệ với chúng tôi ít nhất 48 giờ trước để đặt chỗ.
                   </Typography>
                 </AccordionDetails>
               </Accordion>
@@ -1763,12 +1763,12 @@ const Contact = () => {
                 <AccordionSummary expandIcon={<ExpandMore />} sx={{ bgcolor: 'rgba(139, 69, 19, 0.05)' }}>
                   <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Wifi color="primary" />
-                    Do you have WiFi?
+                    Quán có WiFi không?
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Typography>
-                    Yes! We provide free high-speed WiFi for all customers. Perfect for remote work, studying, or casual browsing.
+                    Có! Chúng tôi cung cấp WiFi tốc độ cao miễn phí cho tất cả khách hàng. Hoàn hảo cho làm việc từ xa, học tập hoặc lướt web thông thường.
                   </Typography>
                 </AccordionDetails>
               </Accordion>
@@ -1777,171 +1777,15 @@ const Contact = () => {
                 <AccordionSummary expandIcon={<ExpandMore />} sx={{ bgcolor: 'rgba(139, 69, 19, 0.05)' }}>
                   <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <Business color="primary" />
-                    Do you offer wholesale services?
+                    Quán có cung cấp dịch vụ bán sỉ không?
                   </Typography>
                 </AccordionSummary>
                 <AccordionDetails>
                   <Typography>
-                    Yes! We supply coffee beans and catering services to businesses. Contact our wholesale team for pricing and minimum orders.
+                    Có! Chúng tôi cung cấp hạt cà phê và dịch vụ ẩm thực cho doanh nghiệp. Liên hệ với đội ngũ bán sỉ của chúng tôi để biết giá cả và đơn hàng tối thiểu.
                   </Typography>
                 </AccordionDetails>
               </Accordion>
-            </Grid>
-          </Grid>
-        </Container>
-      </Box>
-
-      {/* Customer Testimonials */}
-      <Container maxWidth="lg" sx={{ py: 6 }}>
-        <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ mb: 4, fontWeight: 'bold', color: '#8B4513' }}>
-          What Our Customers Say
-        </Typography>
-        <Grid container spacing={4}>
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', borderRadius: 3, boxShadow: 3 }}>
-              <CardContent sx={{ textAlign: 'center', p: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                  {[1,2,3,4,5].map((star) => (
-                    <Star key={star} sx={{ color: '#FFD700', fontSize: '1.5rem' }} />
-                  ))}
-                </Box>
-                <Typography variant="body1" sx={{ mb: 2, fontStyle: 'italic' }}>
-                  "Best coffee in the city! The atmosphere is perfect for work meetings and the staff is incredibly friendly."
-                </Typography>
-                <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                  Sarah Chen
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Regular Customer
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', borderRadius: 3, boxShadow: 3 }}>
-              <CardContent sx={{ textAlign: 'center', p: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                  {[1,2,3,4,5].map((star) => (
-                    <Star key={star} sx={{ color: '#FFD700', fontSize: '1.5rem' }} />
-                  ))}
-                </Box>
-                <Typography variant="body1" sx={{ mb: 2, fontStyle: 'italic' }}>
-                  "Amazing pastries and excellent service! I've hosted three business meetings here and clients always love it."
-                </Typography>
-                <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                  Michael Rodriguez
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Business Owner
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-          
-          <Grid item xs={12} md={4}>
-            <Card sx={{ height: '100%', borderRadius: 3, boxShadow: 3 }}>
-              <CardContent sx={{ textAlign: 'center', p: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                  {[1,2,3,4,5].map((star) => (
-                    <Star key={star} sx={{ color: '#FFD700', fontSize: '1.5rem' }} />
-                  ))}
-                </Box>
-                <Typography variant="body1" sx={{ mb: 2, fontStyle: 'italic' }}>
-                  "The perfect study spot! Great WiFi, comfortable seating, and the best latte art I've ever seen."
-                </Typography>
-                <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                  Emma Thompson
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  University Student
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      </Container>
-
-      {/* Social Media & Connect Section */}
-      <Box sx={{ bgcolor: 'linear-gradient(135deg, #8B4513 0%, #A0522D 100%)', color: 'white', py: 6 }}>
-        <Container maxWidth="lg">
-          <Typography variant="h4" component="h2" gutterBottom align="center" sx={{ mb: 4, fontWeight: 'bold' }}>
-            Stay Connected
-          </Typography>
-          <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Group />
-                Follow Us on Social Media
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 3, opacity: 0.9 }}>
-                Stay updated with our latest coffee blends, events, and special offers. Join our community of coffee lovers!
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <Button
-                  variant="outlined"
-                  startIcon={<Facebook />}
-                  href="https://facebook.com/webcaffe"
-                  target="_blank"
-                  sx={{ color: 'white', borderColor: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
-                >
-                  Facebook
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<Instagram />}
-                  href="https://instagram.com/webcaffe"
-                  target="_blank"
-                  sx={{ color: 'white', borderColor: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
-                >
-                  Instagram
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<Twitter />}
-                  href="https://twitter.com/webcaffe"
-                  target="_blank"
-                  sx={{ color: 'white', borderColor: 'white', '&:hover': { bgcolor: 'rgba(255,255,255,0.1)' } }}
-                >
-                  Twitter
-                </Button>
-              </Box>
-            </Grid>
-            
-            <Grid item xs={12} md={6}>
-              <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                <Support />
-                Need Immediate Help?
-              </Typography>
-              <Typography variant="body1" sx={{ mb: 3, opacity: 0.9 }}>
-                Our customer support team is here to help you with any questions or concerns.
-              </Typography>
-              <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <Button
-                  variant="contained"
-                  startIcon={<Phone />}
-                  href="tel:+842812345678"
-                  sx={{ bgcolor: 'white', color: '#8B4513', '&:hover': { bgcolor: '#f5f5f5' } }}
-                >
-                  Call Now
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<WhatsApp />}
-                  href="https://wa.me/842812345678"
-                  target="_blank"
-                  sx={{ bgcolor: '#25D366', '&:hover': { bgcolor: '#128C7E' } }}
-                >
-                  WhatsApp
-                </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<Chat />}
-                  sx={{ bgcolor: 'white', color: '#8B4513', '&:hover': { bgcolor: '#f5f5f5' } }}
-                >
-                  Live Chat
-                </Button>
-              </Box>
             </Grid>
           </Grid>
         </Container>
@@ -1954,10 +1798,10 @@ const Contact = () => {
             <Card sx={{ textAlign: 'center', p: 3, borderRadius: 3, boxShadow: 2, height: '100%' }}>
               <LocalCafe sx={{ fontSize: '3rem', color: '#8B4513', mb: 2 }} />
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#8B4513' }}>
-                Premium Coffee
+                Cà Phê Cao Cấp
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                We source our beans directly from farmers and roast them fresh daily to ensure the perfect cup every time.
+                Chúng tôi lấy hạt cà phê trực tiếp từ nông dân và rang tươi hàng ngày để đảm bảo mỗi tách cà phê đều hoàn hảo.
               </Typography>
             </Card>
           </Grid>
@@ -1966,10 +1810,10 @@ const Contact = () => {
             <Card sx={{ textAlign: 'center', p: 3, borderRadius: 3, boxShadow: 2, height: '100%' }}>
               <Favorite sx={{ fontSize: '3rem', color: '#8B4513', mb: 2 }} />
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#8B4513' }}>
-                Community Focused
+                Hướng Đến Cộng Đồng
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                More than just a coffee shop - we're a community hub where people connect, work, and create memories.
+                Không chỉ là một quán cà phê - chúng tôi là trung tâm cộng đồng nơi mọi người kết nối, làm việc và tạo ra những kỷ niệm.
               </Typography>
             </Card>
           </Grid>
@@ -1978,10 +1822,10 @@ const Contact = () => {
             <Card sx={{ textAlign: 'center', p: 3, borderRadius: 3, boxShadow: 2, height: '100%' }}>
               <Support sx={{ fontSize: '3rem', color: '#8B4513', mb: 2 }} />
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: '#8B4513' }}>
-                Exceptional Service
+                Dịch Vụ Xuất Sắc
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Our trained baristas and friendly staff are committed to providing you with an outstanding experience every visit.
+                Các barista được đào tạo và nhân viên thân thiện của chúng tôi cam kết mang đến cho bạn trải nghiệm tuyệt vời trong mỗi lần ghé thăm.
               </Typography>
             </Card>
           </Grid>
@@ -1990,22 +1834,22 @@ const Contact = () => {
 
       {/* Track Order Dialog */}
       <Dialog open={trackOrderDialog} onClose={() => setTrackOrderDialog(false)}>
-        <DialogTitle>Track Your Order</DialogTitle>
+        <DialogTitle>Theo Dõi Đơn Hàng Của Bạn</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin="dense"
-            label="Order ID"
+            label="Mã Đơn Hàng"
             fullWidth
             variant="outlined"
             value={trackOrderId}
             onChange={(e) => setTrackOrderId(e.target.value)}
-            placeholder="e.g., WC-123456"
+            placeholder="VD: WC-123456"
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setTrackOrderDialog(false)}>Cancel</Button>
-          <Button onClick={handleTrackOrder} variant="contained">Track</Button>
+          <Button onClick={() => setTrackOrderDialog(false)}>Hủy</Button>
+          <Button onClick={handleTrackOrder} variant="contained">Theo Dõi</Button>
         </DialogActions>
       </Dialog>
     </Box>

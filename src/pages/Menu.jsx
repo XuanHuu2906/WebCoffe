@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Container,
@@ -34,12 +34,18 @@ const Menu = () => {
     categories, 
     loading, 
     error, 
+    fetchProducts,
     searchProducts, 
     filterByCategory, 
     clearFilters 
   } = useProducts();
   
   const { addToCart, getItemQuantity, updateQuantity } = useCart();
+
+  // Fetch products on component mount
+  useEffect(() => {
+    fetchProducts({ limit: 100 }); // Fetch all products without pagination limit
+  }, [fetchProducts]);
 
   // Handle search
   const handleSearch = (event) => {
@@ -48,7 +54,10 @@ const Menu = () => {
     if (value.trim()) {
       searchProducts(value);
     } else {
-      clearFilters();
+      // When search is cleared, explicitly fetch all products
+      clearFilters().then(() => {
+        fetchProducts({ limit: 100 });
+      });
     }
   };
 
@@ -59,7 +68,14 @@ const Menu = () => {
     if (category) {
       filterByCategory(category);
     } else {
-      clearFilters();
+      // When switching back to All Categories, explicitly fetch all products and featured products
+      clearFilters().then(() => {
+        // Fetch all products with a high limit to ensure we get everything
+        return fetchProducts({ limit: 100 });
+      }).then(() => {
+        // Also explicitly fetch featured products to ensure Best Seller section is populated
+        fetchFeaturedProducts();
+      });
     }
   };
 
@@ -117,8 +133,17 @@ const Menu = () => {
       // When no category filter is applied, show all with "Best seller" section
       // First, handle featured products as a special category
       const featuredProducts = products.filter(product => product.featured);
-      if (featuredProducts.length > 0) {
-        grouped['Best seller'] = featuredProducts;
+      
+      // Sort featured products to ensure 'cà phê' appears at the bottom
+      const sortedFeaturedProducts = [...featuredProducts].sort((a, b) => {
+        // If product name is 'cà phê', move it to the end
+        if (a.name.toLowerCase() === 'cà phê') return 1;
+        if (b.name.toLowerCase() === 'cà phê') return -1;
+        return 0; // Keep original order for other products
+      });
+      
+      if (sortedFeaturedProducts.length > 0) {
+        grouped['Best seller'] = sortedFeaturedProducts;
       }
       
       // Then group by actual categories
@@ -150,7 +175,7 @@ const Menu = () => {
           fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
         }}
       >
-        Our Menu
+        Menu
       </Typography>
 
       {/* Search and Filter Controls */}
@@ -219,7 +244,19 @@ const Menu = () => {
               No products found. Try adjusting your search or filters.
             </Typography>
           ) : (
-            Object.entries(groupedProducts).map(([categoryName, categoryProducts]) => (
+            // Sort categories to ensure Cà phê appears right after Best seller
+            Object.entries(groupedProducts)
+              .sort(([categoryA], [categoryB]) => {
+                // Best seller always first
+                if (categoryA === 'Best seller') return -1;
+                if (categoryB === 'Best seller') return 1;
+                // Cà phê comes right after Best seller
+                if (categoryA === 'Cà phê') return -1;
+                if (categoryB === 'Cà phê') return 1;
+                // Alphabetical order for other categories
+                return categoryA.localeCompare(categoryB);
+              })
+              .map(([categoryName, categoryProducts]) => (
               <Box key={categoryName} sx={{ mb: 6 }}>
                 {/* Category Header */}
                 <Typography
@@ -308,7 +345,7 @@ const Menu = () => {
                             
                             {product.featured && (
                               <Chip
-                                label="Featured"
+                                label="Best Seller"
                                 color="primary"
                                 size="small"
                                 sx={{ mt: 1, backgroundColor: '#8B4513' }}

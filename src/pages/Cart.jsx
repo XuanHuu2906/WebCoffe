@@ -760,7 +760,7 @@ const Cart = () => {
         }
 
         const orderResult = await response.json();
-        if (orderResult.success) {
+        if (orderResult.success && orderResult.data && orderResult.data.orderNumber) {
           // Create MoMo payment request
           const momoResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/momo/create`, {
             method: 'POST',
@@ -769,9 +769,9 @@ const Cart = () => {
               'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-              orderId: orderResult.order.orderNumber,
+              orderId: orderResult.data.orderNumber,
               amount: Math.round(finalTotals.total * 100), // Convert to cents
-              orderInfo: `Payment for order ${orderResult.order.orderNumber}`
+              orderInfo: `Payment for order ${orderResult.data.orderNumber}`
             })
           });
 
@@ -783,7 +783,7 @@ const Cart = () => {
           if (momoData.success && momoData.payUrl) {
             // Track MoMo payment initiation
             trackEvent('momo_payment_initiated', {
-              orderId: orderResult.order._id,
+              orderId: orderResult.data._id,
               cartValue: cartSummary.total,
               itemCount: items.length
             });
@@ -799,11 +799,11 @@ const Cart = () => {
             throw new Error(momoData.message || 'Failed to initialize MoMo payment');
           }
         } else {
-          throw new Error(orderResult.message || 'Failed to create order');
+          throw new Error(orderResult.message || (!orderResult.data ? 'Order creation failed - no order data returned' : 'Failed to create order'));
         }
-      } else {
-        // Handle other payment methods (card, cash)
-        console.log('DEBUG: Making regular order request to:', `${import.meta.env.VITE_API_URL}/api/orders`);
+      } else if (paymentMethod === 'vnpay') {
+        // Handle VNPay payment
+        console.log('DEBUG: Making VNPay order request to:', `${import.meta.env.VITE_API_URL}/api/orders`);
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
           method: 'POST',
           headers: {
@@ -812,43 +812,146 @@ const Cart = () => {
           },
           body: JSON.stringify(orderData)
         });
-        console.log('DEBUG: Regular order response status:', response.status);
-        console.log('DEBUG: Regular order response ok:', response.ok);
+        console.log('DEBUG: VNPay order response status:', response.status);
+        console.log('DEBUG: VNPay order response ok:', response.ok);
 
         if (!response.ok) {
           if (response.status === 401) {
             throw new Error('Session expired. Please log in again.');
           }
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to process order. Please try again.');
+          throw new Error(errorData.message || 'Failed to create order. Please try again.');
         }
 
-        const data = await response.json();
-        if (data.success) {
-          // Track successful checkout
-          trackEvent('checkout_completed', {
-            orderId: data.order?._id,
+        const orderResult = await response.json();
+        if (orderResult.success && orderResult.data && orderResult.data.orderNumber) {
+          // Create VNPay payment request
+          const vnpayResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/vnpay/create`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              orderId: orderResult.data.orderNumber,
+              amount: Math.round(finalTotals.total), // Amount in VND (backend will convert to cents)
+              orderInfo: `Payment for order ${orderResult.data.orderNumber}`,
+              bankCode: '', // Optional: can be specified for direct bank selection
+              locale: 'vn' // Vietnamese locale
+            })
+          });
+
+          if (!vnpayResponse.ok) {
+            throw new Error('Failed to create VNPay payment. Please try again.');
+          }
+
+          const vnpayData = await vnpayResponse.json();
+          console.log('VNPay Response:', vnpayData);
+          
+          if (vnpayData.success && vnpayData.data && vnpayData.data.paymentUrl) {
+            console.log('Redirecting to VNPay URL:', vnpayData.data.paymentUrl);
+            
+            // Track VNPay payment initiation
+            trackEvent('vnpay_payment_initiated', {
+              orderId: orderResult.data._id,
+              cartValue: cartSummary.total,
+              itemCount: items.length
+            });
+            
+            // Clear cart and redirect to VNPay payment
+            clearCart();
+            setShowCheckoutDialog(false);
+            setActiveStep(0);
+            
+            // Redirect to VNPay payment page
+            window.location.href = vnpayData.data.paymentUrl;
+          } else {
+            throw new Error(vnpayData.message || 'Failed to initialize VNPay payment');
+          }
+        } else {
+          throw new Error(orderResult.message || (!orderResult.data ? 'Order creation failed - no order data returned' : 'Failed to create order'));
+        }
+      } else if (paymentMethod === 'card') {
+        // Handle card payment - redirect to external payment page
+        console.log('DEBUG: Making card order request to:', `${import.meta.env.VITE_API_URL}/api/orders`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(orderData)
+        });
+        console.log('DEBUG: Card order response status:', response.status);
+        console.log('DEBUG: Card order response ok:', response.ok);
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Session expired. Please log in again.');
+          }
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to create order. Please try again.');
+        }
+
+        const orderResult = await response.json();
+        if (orderResult.success && orderResult.data && orderResult.data.orderNumber) {
+          // Track card payment initiation
+          trackEvent('card_payment_initiated', {
+            orderId: orderResult.data._id,
             cartValue: cartSummary.total,
-            itemCount: items.length,
-            orderType,
-            paymentMethod,
-            promoCodeUsed: appliedPromo?.code,
-            discountAmount: cartSummary.discount
+            itemCount: items.length
           });
           
-          // Clear cart and show success
+          // Clear cart and redirect to card payment page
           clearCart();
-          setOrderSuccess(true);
           setShowCheckoutDialog(false);
           setActiveStep(0);
           
-          // Reset success message after 5 seconds
-          setTimeout(() => {
-            setOrderSuccess(false);
-            navigate('/orders');
-          }, 3000);
+          // Redirect to card payment page
+          navigate(`/payment/card?orderId=${orderResult.data.orderNumber}&amount=${Math.round(finalTotals.total * 100)}`);
         } else {
-          throw new Error(data.message || 'Failed to process order');
+          throw new Error(orderResult.message || (!orderResult.data ? 'Order creation failed - no order data returned' : 'Failed to create order'));
+        }
+      } else if (paymentMethod === 'cash') {
+        // Handle cash payment - redirect to external payment page
+        console.log('DEBUG: Making cash order request to:', `${import.meta.env.VITE_API_URL}/api/orders`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(orderData)
+        });
+        console.log('DEBUG: Cash order response status:', response.status);
+        console.log('DEBUG: Cash order response ok:', response.ok);
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Session expired. Please log in again.');
+          }
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to create order. Please try again.');
+        }
+
+        const orderResult = await response.json();
+        if (orderResult.success && orderResult.data && orderResult.data.orderNumber) {
+          // Track cash payment initiation
+          trackEvent('cash_payment_initiated', {
+            orderId: orderResult.data._id,
+            cartValue: cartSummary.total,
+            itemCount: items.length
+          });
+          
+          // Clear cart and redirect to cash payment page
+          clearCart();
+          setShowCheckoutDialog(false);
+          setActiveStep(0);
+          
+          // Redirect to cash payment page
+          navigate(`/payment/cash?orderId=${orderResult.data.orderNumber}&amount=${Math.round(finalTotals.total * 100)}`);
+        } else {
+          throw new Error(orderResult.message || (!orderResult.data ? 'Order creation failed - no order data returned' : 'Failed to create order'));
         }
       }
     } catch (error) {
@@ -1722,6 +1825,16 @@ const Cart = () => {
                         <Box display="flex" alignItems="center" gap={1}>
                           <AccountBalanceWallet />
                           MoMo E-Wallet
+                        </Box>
+                      }
+                    />
+                    <FormControlLabel
+                      value="vnpay"
+                      control={<Radio />}
+                      label={
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <CreditCard />
+                          VNPay
                         </Box>
                       }
                     />
