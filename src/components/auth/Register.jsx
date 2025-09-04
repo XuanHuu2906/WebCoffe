@@ -172,7 +172,7 @@ const Register = () => {
       >
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Typography variant="h4" component="h1" gutterBottom color="primary">
-            Join WebCaffe
+            Join DREAM COFFEE
           </Typography>
           <Typography variant="body2" color="text.secondary">
             Create your account to start ordering

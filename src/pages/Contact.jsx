@@ -821,14 +821,14 @@ const Contact = () => {
                     border: '1px solid rgba(255,255,255,0.3)'
                   }
                 }}
-                onClick={() => window.location.href = 'mailto:hello@webcaffe.com'}
+                onClick={() => window.location.href = 'mailto:hello@dreamcoffee.com'}
               >
                 <Email sx={{ fontSize: '3rem', mb: 2, color: '#F4A460' }} />
                 <Typography variant="h6" sx={{ color: 'white', fontWeight: 600, mb: 1 }}>
                   Gửi Email
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  hello@webcaffe.com
+                  hello@dreamcoffee.com
                 </Typography>
               </Card>
             </Grid>
@@ -902,19 +902,19 @@ const Contact = () => {
                     Liên Hệ Email
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Chung:</strong> <a href="mailto:hello@webcaffe.com">hello@webcaffe.com</a>
+                    <strong>Chung:</strong> <a href="mailto:hello@dreamcoffee.com">hello@dreamcoffee.com</a>
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Đơn hàng:</strong> <a href="mailto:orders@webcaffe.com">orders@webcaffe.com</a>
+                    <strong>Đơn hàng:</strong> <a href="mailto:orders@dreamcoffee.com">orders@dreamcoffee.com</a>
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Bán sỉ:</strong> <a href="mailto:wholesale@webcaffe.com">wholesale@webcaffe.com</a>
+                    <strong>Bán sỉ:</strong> <a href="mailto:wholesale@dreamcoffee.com">wholesale@dreamcoffee.com</a>
                   </Typography>
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Báo chí:</strong> <a href="mailto:press@webcaffe.com">press@webcaffe.com</a>
+                    <strong>Báo chí:</strong> <a href="mailto:press@dreamcoffee.com">press@dreamcoffee.com</a>
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Tuyển dụng:</strong> <a href="mailto:careers@webcaffe.com">careers@webcaffe.com</a>
+                    <strong>Tuyển dụng:</strong> <a href="mailto:careers@dreamcoffee.com">careers@dreamcoffee.com</a>
                   </Typography>
                 </Box>
 

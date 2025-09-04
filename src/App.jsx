@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CartProvider } from './contexts/CartContext.jsx';
 import { ProductProvider } from './contexts/ProductContext.jsx';
+import { getEnvironmentConfig } from './utils/envCheck.js';
 import Layout from './components/Layout.jsx';
 import Home from './pages/Home.jsx';
 import Menu from './pages/Menu.jsx';
@@ -23,6 +24,7 @@ import PaymentResult from './pages/PaymentResult.jsx';
 import CardPayment from './pages/CardPayment.jsx';
 import CashPayment from './pages/CashPayment.jsx';
 import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
+import AIChatWebLLM from './components/AIChatWebLLM.jsx';
 import './App.css';
 
 // Create a custom theme for the coffee shop
@@ -41,6 +43,11 @@ const theme = createTheme({
 });
 
 function App() {
+  // Log environment configuration on app start
+  useEffect(() => {
+    getEnvironmentConfig();
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -66,6 +73,7 @@ function App() {
                   <Route path="/payment/card" element={<CardPayment />} />
                   <Route path="/payment/cash" element={<CashPayment />} />
                 </Routes>
+                <AIChatWebLLM />
               </Layout>
             </Router>
           </CartProvider>

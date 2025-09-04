@@ -624,11 +624,6 @@ const Cart = () => {
       if (!deliveryInfo.city.trim()) {
         errors.city = 'City is required';
       }
-      if (!deliveryInfo.zipCode.trim()) {
-        errors.zipCode = 'ZIP code is required';
-      } else if (!/^\d{5}(-\d{4})?$/.test(deliveryInfo.zipCode)) {
-        errors.zipCode = 'Please enter a valid ZIP code';
-      }
     }
     
     setValidationErrors(errors);
@@ -1466,128 +1461,6 @@ const Cart = () => {
         </Grid>
       </Grid>
 
-      {/* Recommendations Section */}
-      {items.length > 0 && (
-        <Box sx={{ mt: 6, mb: 4 }}>
-          <Typography
-            variant="h4"
-            component="h2"
-            textAlign="center"
-            gutterBottom
-            sx={{ 
-              fontWeight: 'bold', 
-              color: '#8B4513', 
-              mb: 4,
-              fontSize: { xs: '1.8rem', md: '2.125rem' }
-            }}
-          >
-            You Might Also Like
-          </Typography>
-          
-          <Grid container spacing={3}>
-            {getRecommendations().map((product) => (
-              <Grid item xs={12} sm={6} md={3} key={product._id}>
-                <Card
-                  sx={{
-                    height: '100%',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: 6
-                    }
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    height="180"
-                    image={product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${product.image}`) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=180&fit=crop'}
-                    alt={product.name}
-                    sx={{ objectFit: 'contain', backgroundColor: '#f5f5f5' }}
-                  />
-                  <CardContent sx={{ flexGrow: 1, pb: 1 }}>
-                    <Typography
-                      gutterBottom
-                      variant="h6"
-                      component="h3"
-                      sx={{ fontWeight: 'bold', fontSize: '1.1rem' }}
-                    >
-                      {product.name}
-                    </Typography>
-                    <Typography 
-                      variant="body2" 
-                      color="text.secondary" 
-                      sx={{ 
-                        mb: 2,
-                        display: '-webkit-box',
-                        WebkitLineClamp: 2,
-                        WebkitBoxOrient: 'vertical',
-                        overflow: 'hidden'
-                      }}
-                    >
-                      {product.description}
-                    </Typography>
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography
-                        variant="h6"
-                        sx={{ fontWeight: 'bold', color: '#8B4513' }}
-                      >
-                        {formatPrice(product.price)}
-                      </Typography>
-                      {product.featured && (
-                        <Chip
-                          label="Popular"
-                          size="small"
-                          sx={{ 
-                            backgroundColor: '#8B4513', 
-                            color: 'white',
-                            fontSize: '0.75rem'
-                          }}
-                        />
-                      )}
-                    </Box>
-                    
-                    <Chip
-                      label={product.category}
-                      size="small"
-                      variant="outlined"
-                      sx={{ 
-                        borderColor: '#8B4513', 
-                        color: '#8B4513',
-                        fontSize: '0.7rem'
-                      }}
-                    />
-                  </CardContent>
-                  <Box sx={{ p: 2, pt: 0 }}>
-                    <Button
-                      fullWidth
-                      variant="outlined"
-                      size="small"
-                      onClick={() => handleAddRecommendation(product)}
-                      sx={{
-                        borderColor: '#8B4513',
-                        color: '#8B4513',
-                        '&:hover': {
-                          backgroundColor: '#8B4513',
-                          color: 'white',
-                          borderColor: '#8B4513'
-                        },
-                        textTransform: 'none',
-                        fontWeight: 'medium'
-                      }}
-                    >
-                      Add to Cart
-                    </Button>
-                  </Box>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      )}
-
       {/* Checkout Dialog */}
       <Dialog 
         open={showCheckoutDialog} 
@@ -1650,8 +1523,8 @@ const Cart = () => {
                 {orderType === 'pickup' && (
                   <Alert severity="info" sx={{ mb: 2 }}>
                     <Typography variant="body2">
-                      <strong>Pickup Location:</strong> WebCaffe Main Store<br />
-                      123 Coffee Street, Coffee City, CC 12345<br />
+                      <strong>Pickup Location:</strong> DREAM COFFEE<br />
+                      97 Man Thiện, Hiệp Phú, Thủ Đức, Hồ Chí Minh<br />
                       <strong>Pickup Hours:</strong> Mon-Sun 7:00 AM - 9:00 PM
                     </Typography>
                   </Alert>
@@ -1660,9 +1533,9 @@ const Cart = () => {
                 {orderType === 'delivery' && (
                   <Alert severity="info" sx={{ mb: 2 }}>
                     <Typography variant="body2">
-                      <strong>Delivery Fee:</strong> 3.99 VNĐ<br />
-                      <strong>Estimated Time:</strong> 30-45 minutes<br />
-                      <strong>Delivery Area:</strong> Within 5 miles of our store
+                      <strong>Phí vận chuyển:</strong> 15.000 VNĐ<br />
+                      <strong>Thời gian giao hàng:</strong> 30-45 phút<br />
+                      <strong>Phạm vi giao hàng:</strong> Trong phạm vi 5km của DREAM COFFEE<br />
                     </Typography>
                   </Alert>
                 )}
@@ -1759,16 +1632,6 @@ const Cart = () => {
                           helperText={validationErrors.city}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          fullWidth
-                          label="ZIP Code *"
-                          value={deliveryInfo.zipCode}
-                          onChange={(e) => handleDeliveryInfoChange('zipCode', e.target.value)}
-                          error={!!validationErrors.zipCode}
-                          helperText={validationErrors.zipCode}
-                        />
-                      </Grid>
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
@@ -1858,23 +1721,23 @@ const Cart = () => {
                 <Divider sx={{ my: 2 }} />
                 
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body1">Subtotal:</Typography>
+                  <Typography variant="body1">Tổng tiền:</Typography>
                   <Typography variant="body1">{formatPrice(cartSummary.subtotal)}</Typography>
                 </Box>
                 {orderType === 'delivery' && (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body1">Delivery Fee:</Typography>
-                    <Typography variant="body1">3.99 VNĐ</Typography>
+                    <Typography variant="body1">Phí vận chuyển:</Typography>
+                    <Typography variant="body1">{formatPrice(15000)}</Typography>
                   </Box>
                 )}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body1">Tax:</Typography>
+                  <Typography variant="body1">Thuế:</Typography>
                   <Typography variant="body1">{formatPrice(cartSummary.tax)}</Typography>
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
-                  <Typography variant="h6" fontWeight="bold">Total:</Typography>
+                  <Typography variant="h6" fontWeight="bold">Tổng cộng:</Typography>
                   <Typography variant="h6" fontWeight="bold">
-                    {formatPrice(cartSummary.total + (orderType === 'delivery' ? 3.99 : 0))}
+                    {formatPrice(cartSummary.total + (orderType === 'delivery' ? 15000 : 0))}
                   </Typography>
                 </Box>
                 

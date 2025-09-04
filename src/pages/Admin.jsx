@@ -773,7 +773,14 @@ const Admin = () => {
                         {new Date(order.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
-                        <IconButton size="small">
+                        <IconButton 
+                          size="small"
+                          onClick={() => {
+                            setSelectedOrder(order);
+                            setShowOrderDialog(true);
+                          }}
+                          sx={{ color: '#8B4513' }}
+                        >
                           <Visibility />
                         </IconButton>
                       </TableCell>
@@ -1163,7 +1170,7 @@ const Admin = () => {
           <Typography variant="body2">Token exists: {localStorage.getItem('token') ? 'Yes' : 'No'}</Typography>
 
           <Typography variant="body2">Please log in as admin using:</Typography>
-          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Email: admin@webcaffe.com</Typography>
+          <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Email: admin@dreamcoffee.com</Typography>
           <Typography variant="body2" sx={{ fontWeight: 'bold' }}>Password: password</Typography>
           <Button 
             variant="contained" 

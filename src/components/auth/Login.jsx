@@ -132,7 +132,7 @@ const Login = () => {
             Welcome Back
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Sign in to your WebCaffe account
+            Sign in to your DREAM COFFEE account
           </Typography>
         </Box>
 
