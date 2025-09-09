@@ -254,7 +254,7 @@ const Home = () => {
                       <CardMedia
                         component="img"
                         height="200"
-                        image={item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${item.image}`) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop'}
+                        image={item.imageUrl || (item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5002'}${item.image}`) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop')}
                         alt={item.name}
                         sx={{ objectFit: 'cover', backgroundColor: '#f5f5f5' }}
                       />

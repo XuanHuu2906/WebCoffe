@@ -26,12 +26,24 @@ const ImageUpload = ({
   maxSize = 5 * 1024 * 1024, // 5MB default
   acceptedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
 }) => {
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+  
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
-  const [preview, setPreview] = useState(value || '');
+  const [preview, setPreview] = useState(() => {
+    if (!value) return '';
+    if (typeof value === 'object' && value.imageUrl) {
+      return value.imageUrl;
+    }
+    if (typeof value === 'string' && value.startsWith('http')) {
+      return value;
+    }
+    if (typeof value === 'string' && value.startsWith('/uploads/')) {
+      return `${API_BASE_URL}${value}`;
+    }
+    return value;
+  });
   const fileInputRef = useRef(null);
-
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
   const handleFileSelect = (event) => {
     const file = event.target.files[0];
@@ -75,11 +87,10 @@ const ImageUpload = ({
       console.log('Upload response:', response.data);
       
       if (response.data.success) {
-        const imagePath = response.data.data.path;
-        const fullImageUrl = `${API_BASE_URL}${imagePath}`;
-        console.log('Upload successful, setting preview to:', fullImageUrl);
-        setPreview(fullImageUrl);
-        onChange(imagePath); // Store relative path in database
+        const { imageUrl, imagePublicId } = response.data.data;
+        console.log('Upload successful, setting preview to:', imageUrl);
+        setPreview(imageUrl);
+        onChange({ imageUrl, imagePublicId }); // Store Cloudinary data
       } else {
         console.error('Upload failed - server returned success: false');
         setUploadError('Failed to upload image');
@@ -101,7 +112,16 @@ const ImageUpload = ({
   };
 
   const handleRemoveImage = async () => {
-    if (value && value.startsWith('/uploads/')) {
+    // Handle Cloudinary images
+    if (value && typeof value === 'object' && value.imagePublicId) {
+      try {
+        await axios.delete(`${API_BASE_URL}/api/upload/image/${value.imagePublicId}`);
+      } catch (error) {
+        console.error('Error deleting image:', error);
+      }
+    }
+    // Handle legacy local images
+    else if (value && typeof value === 'string' && value.startsWith('/uploads/')) {
       try {
         const filename = value.split('/').pop();
         await axios.delete(`${API_BASE_URL}/api/upload/image/${filename}`);

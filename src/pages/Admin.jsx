@@ -128,7 +128,7 @@ const Admin = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/dashboard/stats`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/admin/dashboard/stats`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -166,7 +166,7 @@ const Admin = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/dashboard/recent-orders?limit=5`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/admin/dashboard/recent-orders?limit=5`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -214,7 +214,7 @@ const Admin = () => {
         params.append('search', orderSearchTerm);
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/orders?${params}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/admin/orders?${params}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -257,7 +257,7 @@ const Admin = () => {
         params.append('search', customerSearchTerm);
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/customers?${params}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/admin/customers?${params}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -289,7 +289,7 @@ const Admin = () => {
         throw new Error('Authentication required');
       }
 
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/admin/orders/${orderId}/status`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5002'}/api/admin/orders/${orderId}/status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -471,11 +471,22 @@ const Admin = () => {
           description: productForm.description,
           price: productForm.sizes[0].price, // Use first size price as base price
           category: productForm.category,
-          image: productForm.image,
           featured: productForm.featured,
           inStock: productForm.available,
           sizes: productForm.sizes
         };
+
+        // Handle image data properly
+        if (productForm.image) {
+          if (typeof productForm.image === 'object' && productForm.image.imageUrl) {
+            // New Cloudinary image upload
+            productData.imageUrl = productForm.image.imageUrl;
+            productData.imagePublicId = productForm.image.imagePublicId;
+          } else if (typeof productForm.image === 'string') {
+            // Existing image path or URL
+            productData.image = productForm.image;
+          }
+        }
 
         if (editingProduct) {
           await updateProduct(editingProduct._id, productData);
@@ -517,11 +528,25 @@ const Admin = () => {
     fetchProducts({ limit: 100 });
     
     setEditingProduct(product);
+    
+    // Handle image data properly for editing
+    let imageValue = '';
+    if (product.imageUrl && product.imagePublicId) {
+      // Product has Cloudinary image
+      imageValue = {
+        imageUrl: product.imageUrl,
+        imagePublicId: product.imagePublicId
+      };
+    } else if (product.image) {
+      // Product has traditional image path
+      imageValue = product.image;
+    }
+    
     setProductForm({
       name: product.name,
       description: product.description,
       category: product.category,
-      image: product.image || '',
+      image: imageValue,
       featured: product.featured || false,
       available: product.available !== false,
       sizes: product.sizes || []
@@ -849,7 +874,7 @@ const Admin = () => {
               <TableRow key={product._id}>
                 <TableCell sx={{ display: { xs: 'none', sm: 'table-cell' } }}>
                   <img
-                    src={product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${product.image}`) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAyNUgxNVYzNUgyMFYyNVoiIGZpbGw9IiM4QjQ1MTMiLz4KPHA+dGggZD0iTTQ1IDI1SDQwVjM1SDQ1VjI1WiIgZmlsbD0iIzhCNDUxMyIvPgo8cGF0aCBkPSJNMzAgMTVIMjVWNDVIMzBWMTVaIiBmaWxsPSIjOEI0NTEzIi8+CjwvcGF0aD4KPC9zdmc+'}
+                    src={product.imageUrl || (product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5002'}${product.image}`) : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik0yMCAyNUgxNVYzNUgyMFYyNVoiIGZpbGw9IiM4QjQ1MTMiLz4KPHA+dGggZD0iTTQ1IDI1SDQwVjM1SDQ1VjI1WiIgZmlsbD0iIzhCNDUxMyIvPgo8cGF0aCBkPSJNMzAgMTVIMjVWNDVIMzBWMTVaIiBmaWxsPSIjOEI0NTEzIi8+CjwvcGF0aD4KPC9zdmc+')}
                     alt={product.name}
                     style={{ width: 60, height: 60, objectFit: 'contain', backgroundColor: '#f5f5f5', borderRadius: 4 }}
                     onError={(e) => {

@@ -297,7 +297,7 @@ const Menu = () => {
                           <CardMedia
                             component="img"
                             height="330"
-                            image={product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${product.image}`) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop'}
+                            image={product.imageUrl || (product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5002'}${product.image}`) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop')}
                             alt={product.name}
                             sx={{ objectFit: 'cover', backgroundColor: '#f5f5f5' }}
                           />

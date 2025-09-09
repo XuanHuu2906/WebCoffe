@@ -126,18 +126,18 @@ const Header = () => {
           <Button
             color="inherit"
             component={Link}
-            to="/menu"
-            sx={{ textTransform: 'none' }}
-          >
-            Menu
-          </Button>
-          <Button
-            color="inherit"
-            component={Link}
             to="/about"
             sx={{ textTransform: 'none' }}
           >
             About
+          </Button>
+          <Button
+            color="inherit"
+            component={Link}
+            to="/menu"
+            sx={{ textTransform: 'none' }}
+          >
+            Menu
           </Button>
           <Button
             color="inherit"
@@ -300,13 +300,13 @@ const Header = () => {
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>
-                <ListItemButton component={Link} to="/menu" onClick={() => setMobileMenuOpen(false)}>
-                  <ListItemText primary="Menu" />
+                <ListItemButton component={Link} to="/about" onClick={() => setMobileMenuOpen(false)}>
+                  <ListItemText primary="About" />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>
-                <ListItemButton component={Link} to="/about" onClick={() => setMobileMenuOpen(false)}>
-                  <ListItemText primary="About" />
+                <ListItemButton component={Link} to="/menu" onClick={() => setMobileMenuOpen(false)}>
+                  <ListItemText primary="Menu" />
                 </ListItemButton>
               </ListItem>
               <ListItem disablePadding>

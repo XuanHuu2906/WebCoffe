@@ -1115,7 +1115,7 @@ const Cart = () => {
                         mr: { xs: 0, sm: 2 },
                         mb: { xs: 2, sm: 0 }
                       }}
-                      image={item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}${item.product.image}`) : `https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop&auto=format`}
+                      image={item.product.imageUrl || (item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5002'}${item.product.image}`) : `https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop&auto=format`)}
                       alt={item.product.name}
                     />
                     <CardContent sx={{ flex: 1, p: 0, '&:last-child': { pb: 0 } }}>
