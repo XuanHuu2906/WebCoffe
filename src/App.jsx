@@ -66,7 +66,7 @@ function App() {
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                   <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-                  <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+                  <Route path="/admin" element={<ProtectedRoute adminOnly={true}><Admin /></ProtectedRoute>} />
                   <Route path="/momo/return" element={<MoMoReturn />} />
                   <Route path="/vnpay/return" element={<VNPayReturn />} />
                   <Route path="/checkout/result" element={<PaymentResult />} />

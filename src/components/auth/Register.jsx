@@ -44,32 +44,32 @@ const Register = () => {
   const validateField = useCallback((name, value) => {
     switch (name) {
       case 'firstName':
-        if (!value) return 'First name is required';
-        if (value.length < 2) return 'First name must be at least 2 characters';
+        if (!value) return 'Họ là bắt buộc';
+        if (value.length < 2) return 'Họ phải có ít nhất 2 ký tự';
         return '';
       case 'lastName':
-        if (!value) return 'Last name is required';
-        if (value.length < 2) return 'Last name must be at least 2 characters';
+        if (!value) return 'Tên là bắt buộc';
+        if (value.length < 2) return 'Tên phải có ít nhất 2 ký tự';
         return '';
       case 'email':
-        if (!value) return 'Email is required';
-        if (!/\S+@\S+\.\S+/.test(value)) return 'Please enter a valid email address';
+        if (!value) return 'Email là bắt buộc';
+        if (!/\S+@\S+\.\S+/.test(value)) return 'Vui lòng nhập địa chỉ email hợp lệ';
         return '';
       case 'phone':
-        if (value && !/^[+]?[1-9][\d]{0,15}$/.test(value.replace(/[\s\-()]/g, ''))) {
-          return 'Please enter a valid phone number';
+        if (value && !/^\d{10}$/.test(value.replace(/[\s\-()]/g, ''))) {
+          return 'Vui lòng nhập số điện thoại hợp lệ (10 số)';
         }
         return '';
       case 'password':
-        if (!value) return 'Password is required';
-        if (value.length < 6) return 'Password must be at least 6 characters';
+        if (!value) return 'Mật khẩu là bắt buộc';
+        if (value.length < 6) return 'Mật khẩu phải có ít nhất 6 ký tự';
         if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
-          return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+          return 'Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường và một số';
         }
         return '';
       case 'confirmPassword':
-        if (!value) return 'Please confirm your password';
-        if (value !== formData.password) return 'Passwords do not match';
+        if (!value) return 'Vui lòng xác nhận mật khẩu';
+        if (value !== formData.password) return 'Mật khẩu không khớp';
         return '';
       default:
         return '';
@@ -172,10 +172,10 @@ const Register = () => {
       >
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Typography variant="h4" component="h1" gutterBottom color="primary">
-            Join DREAM COFFEE
+            Tham gia DREAM COFFEE
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Create your account to start ordering
+            Tạo tài khoản để bắt đầu đặt hàng
           </Typography>
         </Box>
 
@@ -190,7 +190,7 @@ const Register = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="First Name"
+                label="Họ"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
@@ -212,7 +212,7 @@ const Register = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Last Name"
+                label="Tên"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
@@ -234,7 +234,7 @@ const Register = () => {
 
           <TextField
             fullWidth
-            label="Email Address"
+            label="Địa chỉ Email"
             name="email"
             type="email"
             value={formData.email}
@@ -256,7 +256,7 @@ const Register = () => {
 
           <TextField
             fullWidth
-            label="Phone Number (Optional)"
+            label="Số điện thoại (Tùy chọn)"
             name="phone"
             type="tel"
             value={formData.phone}
@@ -277,7 +277,7 @@ const Register = () => {
 
           <TextField
             fullWidth
-            label="Password"
+            label="Mật khẩu"
             name="password"
             type={showPassword ? 'text' : 'password'}
             value={formData.password}
@@ -287,7 +287,7 @@ const Register = () => {
             required
             autoComplete="new-password"
             error={touched.password && !!errors.password}
-            helperText={(touched.password && errors.password) || (!touched.password && "Must contain uppercase, lowercase, and number")}
+            helperText={(touched.password && errors.password) || (!touched.password && "Phải chứa chữ hoa, chữ thường và số")}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -297,7 +297,7 @@ const Register = () => {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    aria-label="toggle password visibility"
+                    aria-label="hiển thị/ẩn mật khẩu"
                     onClick={togglePasswordVisibility}
                     edge="end"
                   >
@@ -310,7 +310,7 @@ const Register = () => {
 
           <TextField
             fullWidth
-            label="Confirm Password"
+            label="Xác nhận mật khẩu"
             name="confirmPassword"
             type={showConfirmPassword ? 'text' : 'password'}
             value={formData.confirmPassword}
@@ -330,7 +330,7 @@ const Register = () => {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    aria-label="toggle confirm password visibility"
+                    aria-label="hiển thị/ẩn xác nhận mật khẩu"
                     onClick={toggleConfirmPasswordVisibility}
                     edge="end"
                   >
@@ -352,20 +352,20 @@ const Register = () => {
             {loading ? (
               <CircularProgress size={24} color="inherit" />
             ) : (
-              'Create Account'
+              'Tạo tài khoản'
             )}
           </Button>
 
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              Already have an account?{' '}
+              Đã có tài khoản?{' '}
               <Link
                 component={RouterLink}
                 to="/login"
                 color="primary"
                 sx={{ textDecoration: 'none', fontWeight: 'medium' }}
               >
-                Sign in here
+                Đăng nhập tại đây
               </Link>
             </Typography>
           </Box>

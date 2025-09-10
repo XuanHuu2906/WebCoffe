@@ -22,12 +22,14 @@ import { useNavigate } from 'react-router-dom';
 import ImageCarousel from '../components/ImageCarousel';
 import { useProducts } from '../contexts/ProductContext';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import { formatPrice } from '../utils/formatPrice';
 
 const Home = () => {
   const navigate = useNavigate();
   const { fetchFeaturedProducts } = useProducts();
   const { addToCart, getItemQuantity, updateQuantity } = useCart();
+  const { isAuthenticated } = useAuth();
   const [featuredItems, setFeaturedItems] = useState([]);
   const [featuredLoading, setFeaturedLoading] = useState(true);
   const [featuredError, setFeaturedError] = useState(null);
@@ -54,6 +56,18 @@ const Home = () => {
 
   // Add item to cart
   const handleAddToCart = (product) => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      // Redirect to login page
+      navigate('/login', { 
+        state: { 
+          from: '/',
+          message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng'
+        }
+      });
+      return;
+    }
+    
     const size = selectedSize[product._id];
     addToCart(product, 1, size);
   };
@@ -91,7 +105,7 @@ const Home = () => {
         setFeaturedItems(products || []);
       } catch (error) {
         console.error('Error loading featured products:', error);
-        setFeaturedError('Failed to load best seller items. Please try again later.');
+        setFeaturedError('Không thể tải sản phẩm nổi bật. Vui lòng thử lại sau.');
       } finally {
         setFeaturedLoading(false);
       }
@@ -254,7 +268,7 @@ const Home = () => {
                       <CardMedia
                         component="img"
                         height="200"
-                        image={item.imageUrl || (item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5002'}${item.image}`) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop')}
+                        image={item.imageUrl || (item.image ? (item.image.startsWith('http') ? item.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5004'}${item.image}`) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop')}
                         alt={item.name}
                         sx={{ objectFit: 'cover', backgroundColor: '#f5f5f5' }}
                       />

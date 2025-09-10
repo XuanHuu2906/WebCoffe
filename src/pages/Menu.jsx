@@ -20,11 +20,14 @@ import {
   InputLabel
 } from '@mui/material';
 import { Search, Add, Remove } from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 import { useProducts } from '../contexts/ProductContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { formatPrice } from '../utils/formatPrice';
 
 const Menu = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSize, setSelectedSize] = useState({});
@@ -41,6 +44,7 @@ const Menu = () => {
   } = useProducts();
   
   const { addToCart, getItemQuantity, updateQuantity } = useCart();
+  const { isAuthenticated } = useAuth();
 
   // Fetch products on component mount
   useEffect(() => {
@@ -89,6 +93,18 @@ const Menu = () => {
 
   // Add item to cart
   const handleAddToCart = (product) => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      // Redirect to login page
+      navigate('/login', { 
+        state: { 
+          from: '/menu',
+          message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng'
+        }
+      });
+      return;
+    }
+    
     const size = selectedSize[product._id];
     addToCart(product, 1, size);
   };
@@ -183,7 +199,7 @@ const Menu = () => {
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} sm={6}>
             <TextField
-              placeholder="Search menu items..."
+              placeholder="Tìm kiếm sản phẩm..."
               variant="outlined"
               value={searchTerm}
               onChange={handleSearch}
@@ -199,13 +215,13 @@ const Menu = () => {
           </Grid>
           <Grid item xs={12} sm={6}>
             <FormControl fullWidth>
-              <InputLabel>Category</InputLabel>
+              <InputLabel>Danh mục</InputLabel>
               <Select
                 value={selectedCategory}
-                label="Category"
+                label="Danh mục"
                 onChange={handleCategoryChange}
               >
-                <MenuItem value="">All Categories</MenuItem>
+                <MenuItem value="">Tất cả danh mục</MenuItem>
                 {categories.map((category) => (
                   <MenuItem key={category} value={category}>
                     {category.charAt(0).toUpperCase() + category.slice(1).replace('-', ' ')}
@@ -241,7 +257,7 @@ const Menu = () => {
               color="text.secondary"
               sx={{ py: 4 }}
             >
-              No products found. Try adjusting your search or filters.
+              Không tìm thấy sản phẩm. Hãy thử thay đổi tìm kiếm hoặc lọc.
             </Typography>
           ) : (
             // Sort categories to ensure Cà phê appears right after Best seller
@@ -297,7 +313,7 @@ const Menu = () => {
                           <CardMedia
                             component="img"
                             height="330"
-                            image={product.imageUrl || (product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5002'}${product.image}`) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop')}
+                            image={product.imageUrl || (product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5004'}${product.image}`) : 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=300&h=200&fit=crop')}
                             alt={product.name}
                             sx={{ objectFit: 'cover', backgroundColor: '#f5f5f5' }}
                           />
@@ -386,7 +402,7 @@ const Menu = () => {
                                   }
                                 }}
                               >
-                                Add to Cart
+                                Thêm vào giỏ hàng
                               </Button>
                             )}
                           </CardActions>

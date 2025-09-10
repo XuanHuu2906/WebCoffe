@@ -121,7 +121,7 @@ const Header = () => {
             to="/"
             sx={{ textTransform: 'none' }}
           >
-            Home
+            TRANG CHỦ
           </Button>
           <Button
             color="inherit"
@@ -129,7 +129,7 @@ const Header = () => {
             to="/about"
             sx={{ textTransform: 'none' }}
           >
-            About
+            VỀ CHÚNG TÔI
           </Button>
           <Button
             color="inherit"
@@ -137,7 +137,7 @@ const Header = () => {
             to="/menu"
             sx={{ textTransform: 'none' }}
           >
-            Menu
+            MENU
           </Button>
           <Button
             color="inherit"
@@ -145,7 +145,7 @@ const Header = () => {
             to="/contact"
             sx={{ textTransform: 'none' }}
           >
-            Contact
+            LIÊN HỆ
           </Button>
           
           <IconButton
@@ -211,20 +211,20 @@ const Header = () => {
                   <ListItemIcon>
                     <Person fontSize="small" />
                   </ListItemIcon>
-                  Profile
+                  Hồ sơ
                 </MenuItem>
                 <MenuItem onClick={() => handleMenuItemClick('/orders')}>
                   <ListItemIcon>
                     <History fontSize="small" />
                   </ListItemIcon>
-                  Order History
+                  Lịch sử đơn hàng
                 </MenuItem>
                 {user?.role === 'admin' && (
                   <MenuItem onClick={() => handleMenuItemClick('/admin')}>
                     <ListItemIcon>
                       <AdminPanelSettings fontSize="small" />
                     </ListItemIcon>
-                    Admin Dashboard
+                    Bảng điều khiển
                   </MenuItem>
                 )}
                 <Divider />
@@ -232,7 +232,7 @@ const Header = () => {
                   <ListItemIcon>
                     <Logout fontSize="small" />
                   </ListItemIcon>
-                  Logout
+                  Đăng xuất
                 </MenuItem>
               </Menu>
             </>
@@ -244,7 +244,7 @@ const Header = () => {
                 to="/login"
                 sx={{ textTransform: 'none', display: { xs: 'none', md: 'inline-flex' } }}
               >
-                Login
+                ĐĂNG NHẬP
               </Button>
               <Button
                 color="inherit"
@@ -261,7 +261,7 @@ const Header = () => {
                   }
                 }}
               >
-                Sign Up
+                ĐĂNG KÝ
               </Button>
             </>
           )}
@@ -320,27 +320,27 @@ const Header = () => {
                   <ListItem disablePadding>
                     <ListItemButton onClick={() => { handleMenuItemClick('/profile'); setMobileMenuOpen(false); }}>
                       <ListItemIcon><Person /></ListItemIcon>
-                      <ListItemText primary="Profile" />
+                      <ListItemText primary="Hồ sơ" />
                     </ListItemButton>
                   </ListItem>
                   <ListItem disablePadding>
                     <ListItemButton onClick={() => { handleMenuItemClick('/orders'); setMobileMenuOpen(false); }}>
                       <ListItemIcon><History /></ListItemIcon>
-                      <ListItemText primary="Order History" />
+                      <ListItemText primary="Lịch sử đơn hàng" />
                     </ListItemButton>
                   </ListItem>
                   {user?.role === 'admin' && (
                     <ListItem disablePadding>
                       <ListItemButton onClick={() => { handleMenuItemClick('/admin'); setMobileMenuOpen(false); }}>
                         <ListItemIcon><AdminPanelSettings /></ListItemIcon>
-                        <ListItemText primary="Admin Dashboard" />
+                        <ListItemText primary="Bảng điều khiển" />
                       </ListItemButton>
                     </ListItem>
                   )}
                   <ListItem disablePadding>
                     <ListItemButton onClick={() => { handleLogout(); setMobileMenuOpen(false); }}>
                       <ListItemIcon><Logout /></ListItemIcon>
-                      <ListItemText primary="Logout" />
+                      <ListItemText primary="Đăng xuất" />
                     </ListItemButton>
                   </ListItem>
                 </>
@@ -348,12 +348,12 @@ const Header = () => {
                 <>
                   <ListItem disablePadding>
                     <ListItemButton component={Link} to="/login" onClick={() => setMobileMenuOpen(false)}>
-                      <ListItemText primary="Login" />
+                      <ListItemText primary="Đăng nhập" />
                     </ListItemButton>
                   </ListItem>
                   <ListItem disablePadding>
                     <ListItemButton component={Link} to="/register" onClick={() => setMobileMenuOpen(false)}>
-                      <ListItemText primary="Sign Up" />
+                      <ListItemText primary="Đăng ký" />
                     </ListItemButton>
                   </ListItem>
                 </>

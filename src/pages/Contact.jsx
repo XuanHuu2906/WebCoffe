@@ -304,12 +304,28 @@ const Contact = () => {
     setLoading(true);
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Generate ticket ID
-      const newTicketId = `WC-${Date.now().toString().slice(-6)}`;
-      setTicketId(newTicketId);
+      // Make API call to backend
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5004'}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.fullName,
+          email: formData.email,
+          subject: formData.topic,
+          message: formData.message
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit contact form');
+      }
+
+      // Set ticket ID from response
+      setTicketId(data.data.ticketId);
       setSubmitSuccess(true);
       
       // Reset form

@@ -24,7 +24,7 @@ import { searchFAQ, getQuickResponse } from '../lib/faq';
 import { AI_CONTEXT } from '../lib/aiContext';
 
 // API base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5004/api';
 
 // Normalize Vietnamese (remove accents) for robust intent matching
 const norm = (s = '') =>

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useState } from 'react';
+import { useAuth } from './AuthContext.jsx';
 
 // Create Cart Context
 const CartContext = createContext();
@@ -118,16 +119,23 @@ const CART_STORAGE_KEY = 'dreamcoffee_cart';
 const CART_VERSION = '1.0';
 const CART_EXPIRY_DAYS = 7; // Cart expires after 7 days
 
+// Generate user-specific cart key
+const getUserCartKey = (userId) => {
+  return userId ? `${CART_STORAGE_KEY}_${userId}` : CART_STORAGE_KEY;
+};
+
 const cartStorage = {
-  save: (cartData) => {
+  save: (cartData, userId = null) => {
     try {
       const dataToSave = {
         ...cartData,
         version: CART_VERSION,
         timestamp: Date.now(),
-        expiresAt: Date.now() + (CART_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+        expiresAt: Date.now() + (CART_EXPIRY_DAYS * 24 * 60 * 60 * 1000),
+        userId: userId
       };
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(dataToSave));
+      const storageKey = getUserCartKey(userId);
+      localStorage.setItem(storageKey, JSON.stringify(dataToSave));
       return true;
     } catch (error) {
       console.error('Error saving cart to localStorage:', error);
@@ -137,10 +145,12 @@ const cartStorage = {
           ...cartData,
           version: CART_VERSION,
           timestamp: Date.now(),
-          expiresAt: Date.now() + (CART_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+          expiresAt: Date.now() + (CART_EXPIRY_DAYS * 24 * 60 * 60 * 1000),
+          userId: userId
         };
-        localStorage.removeItem(CART_STORAGE_KEY);
-        localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(dataToSave));
+        const storageKey = getUserCartKey(userId);
+        localStorage.removeItem(storageKey);
+        localStorage.setItem(storageKey, JSON.stringify(dataToSave));
         return true;
       } catch (retryError) {
         console.error('Failed to save cart after retry:', retryError);
@@ -149,9 +159,10 @@ const cartStorage = {
     }
   },
 
-  load: () => {
+  load: (userId = null) => {
     try {
-      const savedData = localStorage.getItem(CART_STORAGE_KEY);
+      const storageKey = getUserCartKey(userId);
+      const savedData = localStorage.getItem(storageKey);
       if (!savedData) return null;
 
       const cartData = JSON.parse(savedData);
@@ -159,14 +170,14 @@ const cartStorage = {
       // Check if cart has expired
       if (cartData.expiresAt && Date.now() > cartData.expiresAt) {
         console.log('Cart data expired, clearing...');
-        cartStorage.clear();
+        cartStorage.clear(userId);
         return null;
       }
 
       // Validate cart data structure
       if (!cartData.items || !Array.isArray(cartData.items)) {
         console.warn('Invalid cart data structure, clearing...');
-        cartStorage.clear();
+        cartStorage.clear(userId);
         return null;
       }
 
@@ -197,22 +208,24 @@ const cartStorage = {
       };
     } catch (error) {
       console.error('Error loading cart from localStorage:', error);
-      cartStorage.clear();
+      cartStorage.clear(userId);
       return null;
     }
   },
 
-  clear: () => {
+  clear: (userId = null) => {
     try {
-      localStorage.removeItem(CART_STORAGE_KEY);
+      const storageKey = getUserCartKey(userId);
+      localStorage.removeItem(storageKey);
     } catch (error) {
       console.error('Error clearing cart from localStorage:', error);
     }
   },
 
-  getStorageInfo: () => {
+  getStorageInfo: (userId = null) => {
     try {
-      const savedData = localStorage.getItem(CART_STORAGE_KEY);
+      const storageKey = getUserCartKey(userId);
+      const savedData = localStorage.getItem(storageKey);
       if (!savedData) return null;
 
       const cartData = JSON.parse(savedData);
@@ -232,33 +245,111 @@ const cartStorage = {
 // Cart Provider Component
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
+  const { isAuthenticated, user } = useAuth();
+  const [prevAuthState, setPrevAuthState] = useState({ isAuthenticated: false, userId: null });
 
-  // Load cart from localStorage on mount
+  // Load cart from localStorage on mount and when authentication changes
   useEffect(() => {
     const loadCart = async () => {
       dispatch({ type: 'SET_LOADING', payload: true });
       
       try {
-        const cartData = cartStorage.load();
-        if (cartData) {
-          dispatch({ type: 'LOAD_CART', payload: cartData });
-          console.log('Cart loaded successfully from localStorage');
-        } else {
-          console.log('No valid cart data found in localStorage');
+        const currentUserId = isAuthenticated && user ? user._id : null;
+        const prevUserId = prevAuthState.userId;
+        
+        // If user just logged out (was authenticated, now not), clear the cart
+        if (prevAuthState.isAuthenticated && !isAuthenticated) {
+          console.log('User logged out, clearing cart');
+          dispatch({ type: 'CLEAR_CART' });
+          // Also clear any guest cart data
+          cartStorage.clear(null);
         }
+        // If user just logged in or switched users, merge guest cart with user cart
+        else if ((!prevAuthState.isAuthenticated && isAuthenticated) || 
+                 (isAuthenticated && prevUserId !== currentUserId)) {
+          console.log('User logged in or switched, merging carts');
+          
+          // Get current guest cart (if any)
+          const guestCartData = !prevAuthState.isAuthenticated ? cartStorage.load(null) : null;
+          
+          // Get user's existing cart
+          const userCartData = cartStorage.load(currentUserId);
+          
+          // If there's a guest cart to merge
+          if (guestCartData && guestCartData.items && guestCartData.items.length > 0) {
+            console.log('Merging guest cart with user cart');
+            
+            // Start with user's cart or empty cart
+            let mergedItems = userCartData ? [...userCartData.items] : [];
+            
+            // Merge guest cart items
+            guestCartData.items.forEach(guestItem => {
+              const existingItemIndex = mergedItems.findIndex(
+                item => item.product._id === guestItem.product._id && item.size === guestItem.size
+              );
+              
+              if (existingItemIndex >= 0) {
+                // Add quantities if item already exists
+                mergedItems[existingItemIndex].quantity += guestItem.quantity;
+              } else {
+                // Add new item
+                mergedItems.push(guestItem);
+              }
+            });
+            
+            // Calculate totals for merged cart
+            const mergedTotal = mergedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const mergedItemCount = mergedItems.reduce((sum, item) => sum + item.quantity, 0);
+            
+            const mergedCartData = {
+              items: mergedItems,
+              total: mergedTotal,
+              itemCount: mergedItemCount
+            };
+            
+            dispatch({ type: 'LOAD_CART', payload: mergedCartData });
+            console.log('Guest cart merged successfully with user cart');
+            
+            // Clear guest cart after successful merge
+            cartStorage.clear(null);
+          } else if (userCartData) {
+            // No guest cart, just load user cart
+            dispatch({ type: 'LOAD_CART', payload: userCartData });
+            console.log('User cart loaded successfully from localStorage');
+          } else {
+            // No carts available, start fresh
+            console.log('No cart data found, starting with empty cart');
+            dispatch({ type: 'CLEAR_CART' });
+          }
+        }
+        // For guest users on initial load, load guest cart if available
+        else if (!isAuthenticated && !prevAuthState.isAuthenticated && prevUserId === null) {
+          const cartData = cartStorage.load(null);
+          if (cartData) {
+            dispatch({ type: 'LOAD_CART', payload: cartData });
+            console.log('Guest cart loaded successfully from localStorage');
+          } else {
+            console.log('No guest cart data found');
+            dispatch({ type: 'CLEAR_CART' });
+          }
+        }
+        
+        // Update previous auth state
+        setPrevAuthState({ isAuthenticated, userId: currentUserId });
       } catch (error) {
         console.error('Failed to load cart:', error);
+        dispatch({ type: 'CLEAR_CART' });
       } finally {
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     };
 
     loadCart();
-  }, []);
+  }, [isAuthenticated, user]);
 
   // Save cart to localStorage whenever it changes (with debouncing)
   useEffect(() => {
-    // Don't save if cart is loading or empty on initial load
+    // Don't save if cart is loading
     if (state.loading) return;
 
     const saveTimer = setTimeout(() => {
@@ -268,7 +359,8 @@ export const CartProvider = ({ children }) => {
         itemCount: state.itemCount
       };
       
-      const success = cartStorage.save(cartData);
+      const userId = isAuthenticated && user ? user._id : null;
+      const success = cartStorage.save(cartData, userId);
       if (success) {
         console.log('Cart saved successfully to localStorage');
       } else {
@@ -277,30 +369,36 @@ export const CartProvider = ({ children }) => {
     }, 500); // Debounce saves by 500ms
 
     return () => clearTimeout(saveTimer);
-  }, [state.items, state.total, state.itemCount, state.loading]);
+  }, [state.items, state.total, state.itemCount, state.loading, isAuthenticated, user]);
 
   // Handle storage events (when cart is modified in another tab)
   useEffect(() => {
     const handleStorageChange = (e) => {
-      if (e.key === CART_STORAGE_KEY && e.newValue !== e.oldValue) {
+      const userId = isAuthenticated && user ? user._id : null;
+      const userCartKey = getUserCartKey(userId);
+      
+      if (e.key === userCartKey && e.newValue !== e.oldValue) {
         console.log('Cart updated in another tab, syncing...');
-        const cartData = cartStorage.load();
+        const cartData = cartStorage.load(userId);
         if (cartData) {
           dispatch({ type: 'LOAD_CART', payload: cartData });
+        } else {
+          dispatch({ type: 'CLEAR_CART' });
         }
       }
     };
 
     window.addEventListener('storage', handleStorageChange);
     return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
+  }, [isAuthenticated, user]);
 
   // Handle page visibility change (refresh cart when page becomes visible)
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         // Page became visible, check if cart data is still valid
-        const cartData = cartStorage.load();
+        const userId = isAuthenticated && user ? user._id : null;
+        const cartData = cartStorage.load(userId);
         if (cartData && JSON.stringify(cartData) !== JSON.stringify({
           items: state.items,
           total: state.total,
@@ -314,7 +412,7 @@ export const CartProvider = ({ children }) => {
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [state.items, state.total, state.itemCount]);
+  }, [state.items, state.total, state.itemCount, isAuthenticated, user]);
 
   // Add item to cart
   const addToCart = (product, quantity = 1, size = null) => {
@@ -343,17 +441,20 @@ export const CartProvider = ({ children }) => {
   // Clear entire cart
   const clearCart = () => {
     dispatch({ type: 'CLEAR_CART' });
-    cartStorage.clear();
+    const userId = isAuthenticated && user ? user._id : null;
+    cartStorage.clear(userId);
   };
 
   // Manually sync cart with localStorage
   const syncCart = () => {
     try {
-      const cartData = cartStorage.load();
+      const userId = isAuthenticated && user ? user._id : null;
+      const cartData = cartStorage.load(userId);
       if (cartData) {
         dispatch({ type: 'LOAD_CART', payload: cartData });
         return true;
       }
+      dispatch({ type: 'CLEAR_CART' });
       return false;
     } catch (error) {
       console.error('Error syncing cart:', error);
@@ -363,7 +464,8 @@ export const CartProvider = ({ children }) => {
 
   // Get cart storage information
   const getStorageInfo = () => {
-    return cartStorage.getStorageInfo();
+    const userId = isAuthenticated && user ? user._id : null;
+    return cartStorage.getStorageInfo(userId);
   };
 
   // Force save cart to localStorage
@@ -373,7 +475,8 @@ export const CartProvider = ({ children }) => {
       total: state.total,
       itemCount: state.itemCount
     };
-    return cartStorage.save(cartData);
+    const userId = isAuthenticated && user ? user._id : null;
+    return cartStorage.save(cartData, userId);
   };
 
   // Get item quantity by product ID and size

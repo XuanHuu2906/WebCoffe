@@ -26,7 +26,7 @@ const ImageUpload = ({
   maxSize = 5 * 1024 * 1024, // 5MB default
   acceptedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
 }) => {
-  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+  const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5004';
   
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');

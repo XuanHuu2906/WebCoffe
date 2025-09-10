@@ -113,6 +113,7 @@ export const ProductProvider = ({ children }) => {
       if (filters.featured) queryParams.append('featured', 'true');
       if (filters.page) queryParams.append('page', filters.page);
       if (filters.limit) queryParams.append('limit', filters.limit);
+      if (filters.includeOutOfStock) queryParams.append('includeOutOfStock', 'true');
       
       const response = await axios.get(`${API_BASE_URL}/products?${queryParams}`);
       
@@ -250,7 +251,7 @@ export const ProductProvider = ({ children }) => {
       });
       
       // Refresh products list after creation with a high limit to ensure all products are fetched
-      await fetchProducts({...state.filters, limit: 100});
+      await fetchProducts({...state.filters, limit: 100, includeOutOfStock: true});
       
       return response.data;
     } catch (error) {
@@ -269,7 +270,7 @@ export const ProductProvider = ({ children }) => {
       });
       
       // Refresh products list after update with a high limit to ensure all products are fetched
-      await fetchProducts({...state.filters, limit: 100});
+      await fetchProducts({...state.filters, limit: 100, includeOutOfStock: true});
       
       return response.data;
     } catch (error) {
@@ -284,7 +285,7 @@ export const ProductProvider = ({ children }) => {
       const response = await axios.delete(`${API_BASE_URL}/products/${productId}`);
       
       // Refresh products list after deletion with a high limit to ensure all products are fetched
-      await fetchProducts({...state.filters, limit: 100});
+      await fetchProducts({...state.filters, limit: 100, includeOutOfStock: true});
       
       return response.data;
     } catch (error) {

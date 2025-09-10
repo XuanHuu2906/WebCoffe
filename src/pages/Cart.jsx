@@ -8,6 +8,7 @@ import {
   Card,
   CardContent,
   CardMedia,
+  CardActions,
   IconButton,
   Button,
   Divider,
@@ -96,6 +97,7 @@ const Cart = () => {
   const [promoError, setPromoError] = useState('');
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
   const [recommendations, setRecommendations] = useState([]);
+  const [loadingRecommendations, setLoadingRecommendations] = useState(false);
   const [analytics, setAnalytics] = useState({
     cartViews: 0,
     itemsAdded: 0,
@@ -105,7 +107,7 @@ const Cart = () => {
     sessionStartTime: Date.now()
   });
   
-  const steps = ['Order Details', 'Contact Information', 'Payment & Review'];
+  const steps = ['Thông tin đơn hàng', 'Thông tin giao hàng', 'Thanh toán & Xem lại'];
 
   // Analytics tracking functions
   const trackEvent = (eventType, eventData = {}) => {
@@ -186,6 +188,28 @@ const Cart = () => {
     }
   }, [items]);
 
+  // Load recommendations when cart changes
+  useEffect(() => {
+    const loadRecommendations = async () => {
+      if (items.length > 0) {
+        setLoadingRecommendations(true);
+        try {
+          const recs = await getRecommendations();
+          setRecommendations(recs);
+        } catch (error) {
+          console.error('Failed to load recommendations:', error);
+          setRecommendations([]);
+        } finally {
+          setLoadingRecommendations(false);
+        }
+      } else {
+        setRecommendations([]);
+      }
+    };
+
+    loadRecommendations();
+  }, [items]);
+
   // Authentication check - redirect to login if not authenticated
   if (!isAuthenticated) {
     return (
@@ -196,15 +220,15 @@ const Cart = () => {
           gutterBottom
           sx={{ fontWeight: 'bold', color: '#8B4513', mb: 4 }}
         >
-          Shopping Cart
+          Tóm tắt đơn hàng
         </Typography>
         
         <Paper elevation={3} sx={{ p: 6, maxWidth: 500, mx: 'auto' }}>
           <Typography variant="h5" gutterBottom>
-            Please log in to view your cart
+            Vui lòng đăng nhập để xem giỏ hàng
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            You need to be logged in to access your shopping cart and place orders.
+            Bạn cần đăng nhập để truy cập giỏ hàng và đặt hàng.
           </Typography>
           <Button
             variant="contained"
@@ -216,7 +240,7 @@ const Cart = () => {
               mr: 2
             }}
           >
-            Log In
+            Đăng nhập
           </Button>
           <Button
             variant="outlined"
@@ -228,7 +252,7 @@ const Cart = () => {
               '&:hover': { borderColor: '#A0522D', color: '#A0522D' }
             }}
           >
-            Browse Menu
+            Xem menu
           </Button>
         </Paper>
       </Container>
@@ -243,29 +267,29 @@ const Cart = () => {
     
     // Basic quantity validation
     if (newQuantity <= 0) {
-      return { isValid: false, errors: ['Quantity must be greater than 0'] };
+      return { isValid: false, errors: ['Số lượng phải lớn hơn 0'] };
     }
     
     if (newQuantity > 99) {
-      errors.push('Maximum quantity per item is 99');
+      errors.push('Số lượng tối đa mỗi món là 99');
     }
     
     // Stock availability validation
     if (!item.product.inStock) {
-      errors.push(`${item.product.name} is currently out of stock`);
+      errors.push(`${item.product.name} hiện không có sẵn`);
     }
     
     // Size-specific availability validation
     if (item.size && item.product.sizes) {
       const sizeInfo = item.product.sizes.find(s => s.name === item.size);
       if (sizeInfo && !sizeInfo.available) {
-        errors.push(`${item.size} size is currently unavailable`);
+        errors.push(`${item.size} size không có sẵn`);
       }
     }
     
     // Reasonable quantity limits for cafe items
     if (newQuantity > 20) {
-      errors.push('For large orders (20+ items), please contact us directly');
+      errors.push('Số lượng tối đa mỗi món là 20');
     }
     
     return {
@@ -341,47 +365,47 @@ const Cart = () => {
   // Get stock status message
   const getStockStatus = (item) => {
     if (!item.product.inStock) {
-      return { status: 'out-of-stock', message: 'Out of Stock' };
+      return { status: 'out-of-stock', message: 'Hết hàng' };
     }
     
     if (item.size && item.product.sizes) {
       const sizeInfo = item.product.sizes.find(s => s.name === item.size);
       if (sizeInfo && !sizeInfo.available) {
-        return { status: 'size-unavailable', message: 'Size Unavailable' };
+        return { status: 'size-unavailable', message: 'Size không có sẵn' };
       }
     }
     
     if (item.quantity >= 20) {
-      return { status: 'high-quantity', message: 'High Quantity' };
+      return { status: 'high-quantity', message: 'Số lượng quá cao' };
     }
     
-    return { status: 'available', message: 'Available' };
+    return { status: 'available', message: 'Còn hàng' };
   };
   
   // Promotional code validation and management
   const validatePromoCode = async (code) => {
     // Simulate API call for promo code validation
     const validPromoCodes = {
-      'WELCOME10': { type: 'percentage', value: 10, minOrder: 0, description: '10% off your order' },
-      'SAVE5': { type: 'fixed', value: 5, minOrder: 25, description: '5 VNĐ off orders over 25 VNĐ' },
-      'NEWCUSTOMER': { type: 'percentage', value: 15, minOrder: 30, description: '15% off orders over 30 VNĐ' },
-      'COFFEE20': { type: 'percentage', value: 20, minOrder: 50, description: '20% off orders over 50 VNĐ' },
-      'FREESHIP': { type: 'shipping', value: 0, minOrder: 20, description: 'Free delivery on orders over 20 VNĐ' }
+      'WELCOME10': { type: 'percentage', value: 10, minOrder: 0, description: '10% giảm giá trên đơn hàng' },
+      'SAVE5': { type: 'fixed', value: 5, minOrder: 25, description: '5 VNĐ giảm giá trên đơn hàng trên 25 VNĐ' },
+      'NEWCUSTOMER': { type: 'percentage', value: 15, minOrder: 30, description: '15% giảm giá trên đơn hàng trên 30 VNĐ' },
+      'COFFEE20': { type: 'percentage', value: 20, minOrder: 50, description: '20% giảm giá trên đơn hàng trên 50 VNĐ' },
+      'FREESHIP': { type: 'shipping', value: 0, minOrder: 20, description: 'Giao hàng miễn phí trên đơn hàng trên 20 VNĐ' }
     };
     
-    const upperCode = code.toUpperCase();
-    const promo = validPromoCodes[upperCode];
+    const lowerCode = code.toLowerCase();
+    const promo = validPromoCodes[lowerCode];
     
     if (!promo) {
-      throw new Error('Invalid promotional code');
+      throw new Error('Mã giảm giá không hợp lệ');
     }
     
     if (cartSummary.subtotal < promo.minOrder) {
-      throw new Error(`Minimum order of ${promo.minOrder} VNĐ required for this promo code`);
+      throw new Error(`Mua hàng ít nhất ${promo.minOrder} VNĐ mới có thể sử dụng mã này`);
     }
     
     return {
-      code: upperCode,
+      code: lowerCode,
       ...promo
     };
   };
@@ -389,7 +413,7 @@ const Cart = () => {
   // Apply promotional code
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) {
-      setPromoError('Please enter a promotional code');
+      setPromoError('Vui lòng nhập mã giảm giá');
       trackEvent('promo_code_error', { error: 'empty_code' });
       return;
     }
@@ -466,95 +490,62 @@ const Cart = () => {
   };
 
   // Get product recommendations based on cart contents
-  const getRecommendations = () => {
-    if (items.length === 0) return [];
-    
-    // Sample recommendations - in a real app, this would come from an API
-    const sampleRecommendations = [
-      {
-        _id: 'rec1',
-        name: 'Chocolate Croissant',
-        description: 'Buttery croissant filled with rich chocolate',
-        price: 3.95,
-        category: 'Pastries',
-        image: 'https://images.unsplash.com/photo-1555507036-ab794f4ade0a?w=300&h=180&fit=crop',
-        featured: true
-      },
-      {
-        _id: 'rec2',
-        name: 'Vanilla Latte',
-        description: 'Smooth espresso with steamed milk and vanilla syrup',
-        price: 5.25,
-        category: 'Coffee',
-        image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=180&fit=crop',
-        featured: false
-      },
-      {
-        _id: 'rec3',
-        name: 'Blueberry Muffin',
-        description: 'Fresh baked muffin bursting with blueberries',
-        price: 2.75,
-        category: 'Pastries',
-        image: 'https://images.unsplash.com/photo-1607958996333-41aef7caefaa?w=300&h=180&fit=crop',
-        featured: true
-      },
-      {
-        _id: 'rec4',
-        name: 'Iced Caramel Macchiato',
-        description: 'Espresso with vanilla syrup, steamed milk, and caramel drizzle over ice',
-        price: 5.75,
-        category: 'Cold Drinks',
-        image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=300&h=180&fit=crop',
-        featured: false
-      },
-      {
-        _id: 'rec5',
-        name: 'Cinnamon Roll',
-        description: 'Warm cinnamon roll with cream cheese frosting',
-        price: 4.25,
-        category: 'Desserts',
-        image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&h=180&fit=crop',
-        featured: true
-      },
-      {
-        _id: 'rec6',
-        name: 'Green Tea',
-        description: 'Premium organic green tea with antioxidants',
-        price: 3.25,
-        category: 'Tea',
-        image: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=300&h=180&fit=crop',
-        featured: false
+  const getRecommendations = async () => {
+    try {
+      // Fetch best sellers from the database
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/products/bestsellers`);
+      
+      if (!response.ok) {
+        throw new Error('Lỗi khi lấy danh sách sản phẩm bán chạy');
       }
-    ];
-    
-    // Get categories from current cart items
-    const cartCategories = [...new Set(items.map(item => item.product.category))];
-    const cartItemIds = items.map(item => item.product._id);
-    
-    // Filter out items already in cart and prioritize complementary categories
-    let filtered = sampleRecommendations.filter(rec => !cartItemIds.includes(rec._id));
-    
-    // Smart recommendations based on cart contents
-    if (cartCategories.includes('Coffee')) {
-      // If cart has coffee, recommend pastries and desserts
-      filtered = filtered.filter(rec => ['Pastries', 'Desserts'].includes(rec.category));
-    } else if (cartCategories.includes('Pastries')) {
-      // If cart has pastries, recommend coffee and tea
-      filtered = filtered.filter(rec => ['Coffee', 'Tea', 'Cold Drinks'].includes(rec.category));
-    } else {
-      // Default: show popular items
-      filtered = filtered.filter(rec => rec.featured);
+      
+      const data = await response.json();
+      
+      if (!data.success || !data.data) {
+        throw new Error('Dữ liệu không hợp lệ');
+      }
+      
+      let bestSellers = data.data;
+      
+      // If cart is empty, return empty array (no recommendations when cart is empty)
+      if (items.length === 0) {
+        return [];
+      }
+      
+      // Get categories from current cart items
+      const cartCategories = [...new Set(items.map(item => item.product.category))];
+      const cartItemIds = items.map(item => item.product._id);
+      
+      // Filter out items already in cart
+      let filtered = bestSellers.filter(rec => !cartItemIds.includes(rec._id));
+      
+      // Smart recommendations based on cart contents
+      if (cartCategories.includes('Cà phê')) {
+        // If cart has coffee, recommend pastries and desserts
+        filtered = filtered.filter(rec => ['Bánh ngọt'].includes(rec.category));
+      } else if (cartCategories.includes('Bánh ngọt')) {
+        // If cart has pastries, recommend coffee and drinks
+        filtered = filtered.filter(rec => ['Cà phê', 'Thức uống đậm vị', 'Đồ uống tươi mát'].includes(rec.category));
+      } else {
+        // Default: show featured best sellers
+        filtered = filtered.filter(rec => rec.featured);
+      }
+      
+      // If we don't have enough recommendations, add more from other categories
+      if (filtered.length < 3) {
+        const additional = bestSellers
+          .filter(rec => !cartItemIds.includes(rec._id) && !filtered.find(f => f._id === rec._id))
+          .slice(0, 3 - filtered.length);
+        filtered = [...filtered, ...additional];
+      }
+      
+      return filtered.slice(0, 3); // Show max 3 recommendations
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+      
+      // Fallback: return empty array if API fails
+      return [];
     }
-    
-    // If we don't have enough recommendations, add more from other categories
-    if (filtered.length < 3) {
-      const additional = sampleRecommendations
-        .filter(rec => !cartItemIds.includes(rec._id) && !filtered.find(f => f._id === rec._id))
-        .slice(0, 3 - filtered.length);
-      filtered = [...filtered, ...additional];
-    }
-    
-    return filtered.slice(0, 3); // Show max 3 recommendations
   };
 
   // Handle adding recommended item to cart
@@ -603,26 +594,29 @@ const Cart = () => {
     
     // Always validate contact information (required for both pickup and delivery)
     if (!deliveryInfo.fullName.trim()) {
-      errors.fullName = 'Full name is required';
+      errors.fullName = 'Họ tên là bắt buộc';
     }
     if (!deliveryInfo.phone.trim()) {
-      errors.phone = 'Phone number is required';
+      errors.phone = 'Số điện thoại là bắt buộc';
     } else if (!/^[\d\s\-\+\(\)]+$/.test(deliveryInfo.phone)) {
-      errors.phone = 'Please enter a valid phone number';
+      errors.phone = 'Số điện thoại không hợp lệ';
     }
     if (!deliveryInfo.email.trim()) {
-      errors.email = 'Email is required';
+      errors.email = 'Email là bắt buộc';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(deliveryInfo.email)) {
-      errors.email = 'Please enter a valid email address';
+      errors.email = 'Email không hợp lệ';
     }
     
     // Additional validation for delivery orders
     if (orderType === 'delivery') {
       if (!deliveryInfo.address.trim()) {
-        errors.address = 'Address is required';
+        errors.address = 'Địa chỉ là bắt buộc';
       }
       if (!deliveryInfo.city.trim()) {
-        errors.city = 'City is required';
+        errors.city = 'Thành phố là bắt buộc';
+      }
+      if (!deliveryInfo.district.trim()) {
+        errors.district = 'Quận/huyện là bắt buộc';
       }
     }
     
@@ -682,8 +676,8 @@ const Cart = () => {
 
     // Final validation
     if (!validateDeliveryInfo()) {
-      setError('Please fill in all required fields correctly.');
-      trackEvent('checkout_failed', { reason: 'validation_failed' });
+      setError('Vui lòng điền đầy đủ thông tin liên hệ và địa chỉ giao hàng.');
+      trackEvent('checkout_failed', { reason: 'delivery_info_validation_failed' });
       return;
     }
 
@@ -693,7 +687,7 @@ const Cart = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        throw new Error('Authentication required. Please log in again.');
+        throw new Error('Vui lòng đăng nhập lại.');
       }
 
       // Prepare order data with promotional code information
@@ -748,10 +742,10 @@ const Cart = () => {
 
         if (!response.ok) {
           if (response.status === 401) {
-            throw new Error('Session expired. Please log in again.');
+            throw new Error('Hết phiên đăng nhập. Vui lòng đăng nhập lại.');
           }
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to create order. Please try again.');
+          throw new Error(errorData.message || 'Lỗi khi tạo đơn hàng. Vui lòng thử lại.');
         }
 
         const orderResult = await response.json();
@@ -766,12 +760,12 @@ const Cart = () => {
             body: JSON.stringify({
               orderId: orderResult.data.orderNumber,
               amount: Math.round(finalTotals.total * 100), // Convert to cents
-              orderInfo: `Payment for order ${orderResult.data.orderNumber}`
+              orderInfo: `Thanh toán đơn hàng ${orderResult.data.orderNumber}`
             })
           });
 
           if (!momoResponse.ok) {
-            throw new Error('Failed to create MoMo payment. Please try again.');
+            throw new Error('Tạo thanh toán MoMo thất bại. Vui lòng thử lại.');
           }
 
           const momoData = await momoResponse.json();
@@ -791,10 +785,10 @@ const Cart = () => {
             // Redirect to MoMo payment page
             window.location.href = momoData.payUrl;
           } else {
-            throw new Error(momoData.message || 'Failed to initialize MoMo payment');
+            throw new Error(momoData.message || 'Lỗi khi khởi tạo thanh toán MoMo. Vui lòng thử lại.');
           }
         } else {
-          throw new Error(orderResult.message || (!orderResult.data ? 'Order creation failed - no order data returned' : 'Failed to create order'));
+          throw new Error(orderResult.message || (!orderResult.data ? 'Tạo đơn hàng thất bại - không có dữ liệu đơn hàng trả về' : 'Tạo đơn hàng thất bại'));
         }
       } else if (paymentMethod === 'vnpay') {
         // Handle VNPay payment
@@ -812,10 +806,10 @@ const Cart = () => {
 
         if (!response.ok) {
           if (response.status === 401) {
-            throw new Error('Session expired. Please log in again.');
+            throw new Error('Hết phiên đăng nhập. Vui lòng đăng nhập lại.');
           }
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to create order. Please try again.');
+          throw new Error(errorData.message || 'Lỗi khi tạo đơn hàng. Vui lòng thử lại.');
         }
 
         const orderResult = await response.json();
@@ -837,14 +831,14 @@ const Cart = () => {
           });
 
           if (!vnpayResponse.ok) {
-            throw new Error('Failed to create VNPay payment. Please try again.');
+            throw new Error('Lỗi khi tạo thanh toán VNPay. Vui lòng thử lại.');
           }
 
           const vnpayData = await vnpayResponse.json();
           console.log('VNPay Response:', vnpayData);
           
           if (vnpayData.success && vnpayData.data && vnpayData.data.paymentUrl) {
-            console.log('Redirecting to VNPay URL:', vnpayData.data.paymentUrl);
+            console.log('Chuyển hướng đến VNPay URL:', vnpayData.data.paymentUrl);
             
             // Track VNPay payment initiation
             trackEvent('vnpay_payment_initiated', {
@@ -861,10 +855,10 @@ const Cart = () => {
             // Redirect to VNPay payment page
             window.location.href = vnpayData.data.paymentUrl;
           } else {
-            throw new Error(vnpayData.message || 'Failed to initialize VNPay payment');
+            throw new Error(vnpayData.message || 'Lỗi khi khởi tạo thanh toán VNPay. Vui lòng thử lại.');
           }
         } else {
-          throw new Error(orderResult.message || (!orderResult.data ? 'Order creation failed - no order data returned' : 'Failed to create order'));
+          throw new Error(orderResult.message || (!orderResult.data ? 'Tạo đơn hàng thất bại - không có dữ liệu đơn hàng trả về' : 'Tạo đơn hàng thất bại'));
         }
       } else if (paymentMethod === 'card') {
         // Handle card payment - redirect to external payment page
@@ -882,10 +876,10 @@ const Cart = () => {
 
         if (!response.ok) {
           if (response.status === 401) {
-            throw new Error('Session expired. Please log in again.');
+            throw new Error('Phiên hết hạn. Vui lòng đăng nhập lại.');
           }
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to create order. Please try again.');
+          throw new Error(errorData.message || 'Lỗi khi tạo đơn hàng. Vui lòng thử lại.');
         }
 
         const orderResult = await response.json();
@@ -905,7 +899,7 @@ const Cart = () => {
           // Redirect to card payment page
           navigate(`/payment/card?orderId=${orderResult.data.orderNumber}&amount=${Math.round(finalTotals.total * 100)}`);
         } else {
-          throw new Error(orderResult.message || (!orderResult.data ? 'Order creation failed - no order data returned' : 'Failed to create order'));
+          throw new Error(orderResult.message || (!orderResult.data ? 'Tạo đơn hàng thất bại - không có dữ liệu đơn hàng trả về' : 'Tạo đơn hàng thất bại'));
         }
       } else if (paymentMethod === 'cash') {
         // Handle cash payment - redirect to external payment page
@@ -923,10 +917,10 @@ const Cart = () => {
 
         if (!response.ok) {
           if (response.status === 401) {
-            throw new Error('Session expired. Please log in again.');
+            throw new Error('Phiên hết hạn. Vui lòng đăng nhập lại.');
           }
           const errorData = await response.json();
-          throw new Error(errorData.message || 'Failed to create order. Please try again.');
+          throw new Error(errorData.message || 'Lỗi khi tạo đơn hàng. Vui lòng thử lại.');
         }
 
         const orderResult = await response.json();
@@ -946,12 +940,12 @@ const Cart = () => {
           // Redirect to cash payment page
           navigate(`/payment/cash?orderId=${orderResult.data.orderNumber}&amount=${Math.round(finalTotals.total * 100)}`);
         } else {
-          throw new Error(orderResult.message || (!orderResult.data ? 'Order creation failed - no order data returned' : 'Failed to create order'));
+          throw new Error(orderResult.message || (!orderResult.data ? 'Lỗi khi tạo đơn hàng. Vui lòng thử lại.' : 'Failed to create order'));
         }
       }
     } catch (error) {
       console.error('Checkout failed:', error);
-      setError(error.message || 'Checkout failed. Please try again.');
+      setError(error.message || 'Lỗi khi thanh toán. Vui lòng thử lại.');
       trackEvent('checkout_failed', {
         reason: 'api_error',
         error: error.message,
@@ -972,15 +966,15 @@ const Cart = () => {
           gutterBottom
           sx={{ fontWeight: 'bold', color: '#8B4513', mb: 4 }}
         >
-          Shopping Cart
+          Giỏ hàng
         </Typography>
         
         <Paper elevation={3} sx={{ p: 6, maxWidth: 500, mx: 'auto' }}>
           <Typography variant="h5" gutterBottom>
-            Your cart is empty
+            Giỏ hàng của bạn đang trống
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Add some delicious items from our menu to get started!
+            Thêm một số món ăn để bắt đầu!
           </Typography>
           <Button
             variant="contained"
@@ -992,7 +986,7 @@ const Cart = () => {
               '&:hover': { backgroundColor: '#A0522D' }
             }}
           >
-            Browse Menu
+            Xem menu
           </Button>
         </Paper>
       </Container>
@@ -1005,10 +999,10 @@ const Cart = () => {
       <Container sx={{ py: 4, textAlign: 'center' }}>
         <Paper elevation={3} sx={{ p: 6, maxWidth: 500, mx: 'auto' }}>
           <Typography variant="h4" gutterBottom sx={{ color: '#4caf50' }}>
-            Order Placed Successfully!
+            Thanh toán thành công!
           </Typography>
           <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Thank you for your order. You will be redirected to your order history shortly.
+            Cảm ơn bạn đã đặt hàng. Bạn sẽ được chuyển hướng đến trang lịch sử đơn hàng trong vài giây.
           </Typography>
         </Paper>
       </Container>
@@ -1029,7 +1023,7 @@ const Cart = () => {
           fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
         }}
       >
-        Shopping Cart
+        Tóm tắt đơn hàng
       </Typography>
 
       {/* Error Alert */}
@@ -1059,7 +1053,7 @@ const Cart = () => {
                 fontWeight: 'bold',
                 fontSize: { xs: '1.25rem', sm: '1.5rem' }
               }}>
-                Cart Items ({itemCount})
+                Sản phẩm ({itemCount})
               </Typography>
               <Button
                 color="error"
@@ -1072,17 +1066,17 @@ const Cart = () => {
                   py: { xs: 0.5, sm: 1 }
                 }}
               >
-                Clear Cart
+                Xóa tất cả
               </Button>
             </Box>
 
             {items.length === 0 ? (
               <Box sx={{ textAlign: 'center', py: 6 }}>
                 <Typography variant="h6" color="text.secondary" gutterBottom>
-                  Your cart is empty
+                  Giỏ hàng của bạn đang trống
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  Add some delicious items to get started!
+                  Thêm một số món ăn để bắt đầu!
                 </Typography>
                 <Button
                   component={Link}
@@ -1093,7 +1087,7 @@ const Cart = () => {
                     '&:hover': { backgroundColor: '#A0522D' }
                   }}
                 >
-                  Browse Menu
+                  Xem menu
                 </Button>
               </Box>
             ) : (
@@ -1115,7 +1109,7 @@ const Cart = () => {
                         mr: { xs: 0, sm: 2 },
                         mb: { xs: 2, sm: 0 }
                       }}
-                      image={item.product.imageUrl || (item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5002'}${item.product.image}`) : `https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop&auto=format`)}
+                      image={item.product.imageUrl || (item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5004'}${item.product.image}`) : `https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop&auto=format`)}
                       alt={item.product.name}
                     />
                     <CardContent sx={{ flex: 1, p: 0, '&:last-child': { pb: 0 } }}>
@@ -1161,7 +1155,7 @@ const Cart = () => {
                           {/* Stock Status Indicator */}
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                             <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                              Status:
+                              Số lượng:
                             </Typography>
                             {(() => {
                               const stockStatus = getStockStatus(item);
@@ -1216,7 +1210,7 @@ const Cart = () => {
                       }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Typography variant="body2" sx={{ fontWeight: 'medium', mr: 1 }}>
-                            Quantity:
+                            Số lượng:
                           </Typography>
                           <IconButton
                             size="small"
@@ -1304,6 +1298,8 @@ const Cart = () => {
           </Paper>
         </Grid>
 
+
+
         {/* Order Summary */}
         <Grid item xs={12} md={4}>
           <Paper elevation={3} sx={{ 
@@ -1313,13 +1309,13 @@ const Cart = () => {
             mt: { xs: 2, md: 0 }
           }}>
             <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3 }}>
-              Order Summary
+              Tóm tắt đơn hàng
             </Typography>
             
             {/* Promotional Code Section */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold' }}>
-                Promotional Code
+                Mã giảm giá
               </Typography>
               
               {!appliedPromo ? (
@@ -1332,7 +1328,7 @@ const Cart = () => {
                   }}>
                     <TextField
                       size="small"
-                      placeholder="Enter promo code"
+                      placeholder="Nhập mã giảm giá"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                       onKeyPress={(e) => e.key === 'Enter' && handleApplyPromo()}
@@ -1354,7 +1350,7 @@ const Cart = () => {
                         }
                       }}
                     >
-                      {isApplyingPromo ? 'Applying...' : 'Apply'}
+                      {isApplyingPromo ? 'Duyệt...' : 'Duyệt'}
                     </Button>
                   </Box>
                   {promoError && (
@@ -1387,7 +1383,7 @@ const Cart = () => {
                       onClick={handleRemovePromo}
                       sx={{ color: '#d32f2f', minWidth: 'auto' }}
                     >
-                      Remove
+                      XÓA
                     </Button>
                   </Box>
                 </Box>
@@ -1396,7 +1392,7 @@ const Cart = () => {
             
             <Box sx={{ mb: 2 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Subtotal:</Typography>
+                <Typography>Tổng cộng:</Typography>
                 <Typography>{formatPrice(getFinalTotals().subtotal)}</Typography>
               </Box>
               {appliedPromo && getFinalTotals().discount > 0 && (
@@ -1406,7 +1402,7 @@ const Cart = () => {
                 </Box>
               )}
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                <Typography>Tax (8.5%):</Typography>
+                <Typography>Thuế (8.5%):</Typography>
                 <Typography>{formatPrice(getFinalTotals().tax)}</Typography>
               </Box>
               <Divider sx={{ my: 2 }} />
@@ -1422,7 +1418,7 @@ const Cart = () => {
               fullWidth
               multiline
               rows={3}
-              label="Order Notes (Optional)"
+              label="Ghi chú đơn hàng (Tùy chọn)"
               value={orderNotes}
               onChange={(e) => setOrderNotes(e.target.value)}
               sx={{ mb: 3 }}
@@ -1446,7 +1442,7 @@ const Cart = () => {
                 py: 1.5
               }}
             >
-              Proceed to Checkout
+              Tiến hành thanh toán
             </Button>
 
             <Button
@@ -1455,11 +1451,89 @@ const Cart = () => {
               to="/menu"
               sx={{ mt: 2 }}
             >
-              Continue Shopping
+              Tiếp tục mua sắm
             </Button>
           </Paper>
         </Grid>
       </Grid>
+
+      {/* Recommendations Section */}
+      {recommendations.length > 0 && (
+        <Grid container spacing={3} sx={{ mt: 2 }}>
+          <Grid item xs={12}>
+            <Paper elevation={3} sx={{ p: { xs: 2, sm: 3 } }}>
+              <Typography variant="h5" sx={{ fontWeight: 'bold', mb: 3, color: '#8B4513' }}>
+                Có thể bạn sẽ thích
+              </Typography>
+              
+              {loadingRecommendations ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                  <Typography>Đang tải gợi ý...</Typography>
+                </Box>
+              ) : (
+                <Grid container spacing={3}>
+                  {recommendations.map((product) => (
+                    <Grid item xs={12} sm={6} md={4} lg={3} key={product._id}>
+                      <Card sx={{ 
+                        height: '100%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        transition: 'transform 0.2s',
+                        '&:hover': {
+                          transform: 'translateY(-4px)',
+                          boxShadow: 4
+                        }
+                      }}>
+                        <CardMedia
+                          component="img"
+                          height="330"
+                          image={product.image ? `${import.meta.env.VITE_API_URL || 'http://localhost:5004'}${product.image}` : '/api/placeholder/300/200'}
+                          alt={product.name}
+                          sx={{ objectFit: 'cover', backgroundColor: '#f5f5f5' }}
+                        />
+                        <CardContent sx={{ flexGrow: 1 }}>
+                          <Typography
+                            gutterBottom
+                            variant="h5"
+                            component="h3"
+                            sx={{ fontWeight: 'bold' }}
+                          >
+                            {product.name}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                            {product.description}
+                          </Typography>
+                          <Typography
+                            variant="h6"
+                            sx={{ fontWeight: 'bold', color: '#8B4513' }}
+                          >
+                            {formatPrice(product.price)}
+                          </Typography>
+                        </CardContent>
+                        <CardActions sx={{ p: 2 }}>
+                          <Button
+                            variant="contained"
+                            fullWidth
+                            onClick={() => handleAddRecommendation(product)}
+                            sx={{
+                              backgroundColor: '#8B4513',
+                              '&:hover': {
+                                backgroundColor: '#A0522D'
+                              }
+                            }}
+                          >
+                            Thêm vào giỏ hàng
+                          </Button>
+                        </CardActions>
+                      </Card>
+                    </Grid>
+                  ))}
+                </Grid>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
+      )}
 
       {/* Checkout Dialog */}
       <Dialog 
@@ -1471,7 +1545,7 @@ const Cart = () => {
         <DialogTitle>
           <Box display="flex" alignItems="center" gap={1}>
             <ShoppingCartCheckout />
-            Checkout
+            Thanh toán
           </Box>
         </DialogTitle>
         <DialogContent>
@@ -1489,7 +1563,7 @@ const Cart = () => {
             {activeStep === 0 && (
               <Box>
                 <Typography variant="h6" gutterBottom>
-                  Choose Order Type
+                  Chọn hình thức nhận hàng
                 </Typography>
                 <FormControl component="fieldset" sx={{ mb: 3 }}>
                   <RadioGroup
@@ -1503,7 +1577,7 @@ const Cart = () => {
                       label={
                         <Box display="flex" alignItems="center" gap={1}>
                           <Store />
-                          Pickup
+                          Lấy hàng tại cửa hàng
                         </Box>
                       }
                     />
@@ -1513,7 +1587,7 @@ const Cart = () => {
                       label={
                         <Box display="flex" alignItems="center" gap={1}>
                           <LocalShipping />
-                          Delivery
+                          Giao hàng
                         </Box>
                       }
                     />
@@ -1523,9 +1597,9 @@ const Cart = () => {
                 {orderType === 'pickup' && (
                   <Alert severity="info" sx={{ mb: 2 }}>
                     <Typography variant="body2">
-                      <strong>Pickup Location:</strong> DREAM COFFEE<br />
+                      <strong>Địa chỉ lấy hàng:</strong> DREAM COFFEE<br />
                       97 Man Thiện, Hiệp Phú, Thủ Đức, Hồ Chí Minh<br />
-                      <strong>Pickup Hours:</strong> Mon-Sun 7:00 AM - 9:00 PM
+                      <strong>Thời gian lấy hàng:</strong> Mon-Sun 7:00 AM - 9:00 PM
                     </Typography>
                   </Alert>
                 )}

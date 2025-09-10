@@ -70,20 +70,20 @@ const Profile = () => {
   const validateProfileField = (name, value) => {
     switch (name) {
       case 'firstName':
-        if (!value) return 'First name is required';
-        if (value.length < 2) return 'First name must be at least 2 characters';
+        if (!value) return 'Tên là bắt buộc';
+      if (value.length < 2) return 'Tên phải có ít nhất 2 ký tự';
         return '';
       case 'lastName':
-        if (!value) return 'Last name is required';
-        if (value.length < 2) return 'Last name must be at least 2 characters';
+        if (!value) return 'Họ là bắt buộc';
+      if (value.length < 2) return 'Họ phải có ít nhất 2 ký tự';
         return '';
       case 'email':
-        if (!value) return 'Email is required';
-        if (!/\S+@\S+\.\S+/.test(value)) return 'Please enter a valid email address';
+        if (!value) return 'Email là bắt buộc';
+      if (!/\S+@\S+\.\S+/.test(value)) return 'Vui lòng nhập địa chỉ email hợp lệ';
         return '';
       case 'phone':
         if (value && !/^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/[\s\-\(\)]/g, ''))) {
-          return 'Please enter a valid phone number';
+          return 'Vui lòng nhập số điện thoại hợp lệ';
         }
         return '';
       case 'street':
@@ -94,7 +94,7 @@ const Profile = () => {
         return '';
       case 'zipCode':
         if (value && !/^\d{5}(-\d{4})?$/.test(value)) {
-          return 'Please enter a valid ZIP code (e.g., 12345 or 12345-6789)';
+          return 'Vui lòng nhập mã bưu điện hợp lệ (ví dụ: 12345 hoặc 12345-6789)';
         }
         return '';
       default:
@@ -105,18 +105,18 @@ const Profile = () => {
   const validatePasswordField = (name, value) => {
     switch (name) {
       case 'currentPassword':
-        if (!value) return 'Current password is required';
+        if (!value) return 'Mật khẩu hiện tại là bắt buộc';
         return '';
       case 'newPassword':
-        if (!value) return 'New password is required';
-        if (value.length < 6) return 'Password must be at least 6 characters';
+        if (!value) return 'Mật khẩu mới là bắt buộc';
+      if (value.length < 6) return 'Mật khẩu phải có ít nhất 6 ký tự';
         if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(value)) {
-          return 'Password must contain at least one uppercase letter, one lowercase letter, and one number';
+          return 'Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường và một số';
         }
         return '';
       case 'confirmPassword':
-        if (!value) return 'Please confirm your new password';
-        if (value !== passwordData.newPassword) return 'Passwords do not match';
+        if (!value) return 'Vui lòng xác nhận mật khẩu mới';
+        if (value !== passwordData.newPassword) return 'Mật khẩu không khớp';
         return '';
       default:
         return '';
@@ -250,7 +250,7 @@ const Profile = () => {
     setProfileTouched(touchedFields);
 
     if (!validateProfileForm()) {
-      setMessage({ type: 'error', text: 'Please fix the validation errors before saving' });
+      setMessage({ type: 'error', text: 'Vui lòng sửa các lỗi xác thực trước khi lưu' });
       setTimeout(() => setMessage({ type: '', text: '' }), 5000);
       return;
     }
@@ -260,10 +260,10 @@ const Profile = () => {
       setIsEditing(false);
       setProfileTouched({});
       setProfileErrors({});
-      setMessage({ type: 'success', text: 'Profile updated successfully!' });
+      setMessage({ type: 'success', text: 'Cập nhật hồ sơ thành công!' });
       setTimeout(() => setMessage({ type: '', text: '' }), 5000);
     } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Failed to update profile' });
+      setMessage({ type: 'error', text: error.message || 'Không thể cập nhật hồ sơ' });
       setTimeout(() => setMessage({ type: '', text: '' }), 5000);
     }
   };
@@ -292,7 +292,7 @@ const Profile = () => {
     setPasswordTouched(touchedFields);
 
     if (!validatePasswordForm()) {
-      setMessage({ type: 'error', text: 'Please fix the validation errors before changing password' });
+      setMessage({ type: 'error', text: 'Vui lòng sửa các lỗi xác thực trước khi đổi mật khẩu' });
       setTimeout(() => setMessage({ type: '', text: '' }), 5000);
       return;
     }
@@ -306,10 +306,10 @@ const Profile = () => {
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       setPasswordTouched({});
       setPasswordErrors({});
-      setMessage({ type: 'success', text: 'Password changed successfully!' });
+      setMessage({ type: 'success', text: 'Đổi mật khẩu thành công!' });
       setTimeout(() => setMessage({ type: '', text: '' }), 5000);
     } catch (error) {
-      setMessage({ type: 'error', text: error.message || 'Failed to change password' });
+      setMessage({ type: 'error', text: error.message || 'Không thể đổi mật khẩu' });
       setTimeout(() => setMessage({ type: '', text: '' }), 5000);
     }
   };
@@ -342,7 +342,7 @@ const Profile = () => {
         gutterBottom
         sx={{ fontWeight: 'bold', color: '#8B4513', mb: 4 }}
       >
-        My Profile
+        Hồ Sơ Của Tôi
       </Typography>
 
       {/* Message Display */}
@@ -389,7 +389,7 @@ const Profile = () => {
           <Grid item xs={12} md={8}>
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Profile Information
+                Thông Tin Cơ Bản
               </Typography>
               {!isEditing ? (
                 <Button
@@ -397,7 +397,7 @@ const Profile = () => {
                   onClick={() => setIsEditing(true)}
                   sx={{ color: '#8B4513' }}
                 >
-                  Edit Profile
+                  Chỉnh Sửa
                 </Button>
               ) : (
                 <Box sx={{ display: 'flex', gap: 1 }}>
@@ -411,14 +411,14 @@ const Profile = () => {
                       '&:hover': { backgroundColor: '#A0522D' }
                     }}
                   >
-                    Save
+                    Lưu
                   </Button>
                   <Button
                     startIcon={<Cancel />}
                     onClick={handleCancelEdit}
                     disabled={loading}
                   >
-                    Cancel
+                    Hủy
                   </Button>
                 </Box>
               )}
@@ -428,7 +428,7 @@ const Profile = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="First Name"
+                  label="Tên"
                   name="firstName"
                   value={profileData.firstName}
                   onChange={handleProfileChange}
@@ -442,7 +442,7 @@ const Profile = () => {
               <Grid item xs={12} sm={6}>
                 <TextField
                   fullWidth
-                  label="Last Name"
+                  label="Họ"
                   name="lastName"
                   value={profileData.lastName}
                   onChange={handleProfileChange}
@@ -471,7 +471,7 @@ const Profile = () => {
               <Grid item xs={12}>
                 <TextField
                   fullWidth
-                  label="Phone Number"
+                  label="Số Điện Thoại"
                   name="phone"
                   value={profileData.phone}
                   onChange={handleProfileChange}
@@ -489,13 +489,13 @@ const Profile = () => {
             {/* Address Section */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                Address Information
+                Địa Chỉ
               </Typography>
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    label="Street Address"
+                    label="Địa Chỉ Đường"
                     name="address.street"
                     value={profileData.address.street}
                     onChange={handleProfileChange}
@@ -509,7 +509,7 @@ const Profile = () => {
                 <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
-                    label="City"
+                    label="Thành Phố"
                     name="address.city"
                     value={profileData.address.city}
                     onChange={handleProfileChange}
@@ -523,7 +523,7 @@ const Profile = () => {
                 <Grid item xs={12} sm={3}>
                   <TextField
                     fullWidth
-                    label="State"
+                    label="Tỉnh/Thành"
                     name="address.state"
                     value={profileData.address.state}
                     onChange={handleProfileChange}
@@ -537,7 +537,7 @@ const Profile = () => {
                 <Grid item xs={12} sm={3}>
                   <TextField
                     fullWidth
-                    label="ZIP Code"
+                    label="Mã Bưu Điện"
                     name="address.zipCode"
                     value={profileData.address.zipCode}
                     onChange={handleProfileChange}
@@ -554,14 +554,14 @@ const Profile = () => {
             {/* Loyalty Points Section */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                Loyalty Program
+                Chương Trình Khách Hàng Thân Thiết
               </Typography>
               <Paper sx={{ p: 2, backgroundColor: '#f5f5f5' }}>
                 <Typography variant="h4" sx={{ fontWeight: 'bold', color: '#8B4513' }}>
                   {user.loyaltyPoints || 0} Points
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                  Earn points with every purchase and redeem for rewards!
+                  Tích điểm với mỗi lần mua hàng và đổi quà tặng!
                 </Typography>
               </Paper>
             </Box>
@@ -569,7 +569,7 @@ const Profile = () => {
             {/* Preferences Section */}
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2 }}>
-                Preferences
+                Tùy Chọn
               </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12}>
@@ -585,7 +585,7 @@ const Profile = () => {
                     />
                     <label htmlFor="newsletter">
                       <Typography variant="body1">
-                        Subscribe to newsletter for updates and special offers
+                        Đăng ký nhận bản tin để cập nhật và nhận ưu đãi đặc biệt
                       </Typography>
                     </label>
                   </Box>
@@ -603,7 +603,7 @@ const Profile = () => {
                     />
                     <label htmlFor="notifications">
                       <Typography variant="body1">
-                        Receive order status notifications
+                        Nhận thông báo trạng thái đơn hàng
                       </Typography>
                     </label>
                   </Box>
@@ -616,19 +616,19 @@ const Profile = () => {
             {/* Password Section */}
             <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-                Security
+                Bảo Mật
               </Typography>
               <Button
                 startIcon={<Lock />}
                 onClick={() => setShowPasswordDialog(true)}
                 sx={{ color: '#8B4513' }}
               >
-                Change Password
+                Đổi Mật Khẩu
               </Button>
             </Box>
 
             <Typography variant="body2" color="text.secondary">
-              Last password change: {user.passwordChangedAt ? new Date(user.passwordChangedAt).toLocaleDateString() : 'Never'}
+              Lần đổi mật khẩu cuối: {user.passwordChangedAt ? new Date(user.passwordChangedAt).toLocaleDateString() : 'Chưa bao giờ'}
             </Typography>
           </Grid>
         </Grid>
@@ -642,13 +642,13 @@ const Profile = () => {
         fullWidth
       >
         <DialogTitle>
-          Change Password
+          Đổi Mật Khẩu
         </DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
             <TextField
               fullWidth
-              label="Current Password"
+              label="Mật Khẩu Hiện Tại"
               name="currentPassword"
               type={showPassword ? 'text' : 'password'}
               value={passwordData.currentPassword}
@@ -672,7 +672,7 @@ const Profile = () => {
             />
             <TextField
               fullWidth
-              label="New Password"
+              label="Mật Khẩu Mới"
               name="newPassword"
               type={showNewPassword ? 'text' : 'password'}
               value={passwordData.newPassword}
@@ -680,7 +680,7 @@ const Profile = () => {
               onBlur={handlePasswordBlur}
               sx={{ mb: 3 }}
               error={passwordTouched.newPassword && !!passwordErrors.newPassword}
-              helperText={(passwordTouched.newPassword && passwordErrors.newPassword) || (!passwordTouched.newPassword && "Must contain uppercase, lowercase, and number")}
+              helperText={(passwordTouched.newPassword && passwordErrors.newPassword) || (!passwordTouched.newPassword && "Phải chứa chữ hoa, chữ thường và số")}
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
@@ -696,7 +696,7 @@ const Profile = () => {
             />
             <TextField
               fullWidth
-              label="Confirm New Password"
+              label="Xác Nhận Mật Khẩu Mới"
               name="confirmPassword"
               type={showConfirmPassword ? 'text' : 'password'}
               value={passwordData.confirmPassword}
@@ -721,7 +721,7 @@ const Profile = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClosePasswordDialog}>
-            Cancel
+            Hủy
           </Button>
           <Button 
             onClick={handleChangePassword}
@@ -732,7 +732,7 @@ const Profile = () => {
               '&:hover': { backgroundColor: '#A0522D' }
             }}
           >
-            Change Password
+            Đổi Mật Khẩu
           </Button>
         </DialogActions>
       </Dialog>

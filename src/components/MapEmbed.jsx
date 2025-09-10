@@ -32,7 +32,7 @@ export default function MapEmbed() {
           target="_blank"
           rel="noreferrer"
         >
-          Get Directions
+          Mở Map
         </Button>
       </Box>
     </Box>

@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { Visibility, VisibilityOff, Email, Lock } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext.jsx';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, useLocation, Link as RouterLink } from 'react-router-dom';
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -26,17 +26,21 @@ const Login = () => {
   
   const { login, loading, error, clearError } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get message from navigation state
+  const redirectMessage = location.state?.message;
 
   // Validation rules
   const validateField = (name, value) => {
     switch (name) {
       case 'email':
-        if (!value) return 'Email is required';
-        if (!/\S+@\S+\.\S+/.test(value)) return 'Please enter a valid email address';
+        if (!value) return 'Email là bắt buộc';
+        if (!/\S+@\S+\.\S+/.test(value)) return 'Vui lòng nhập địa chỉ email hợp lệ';
         return '';
       case 'password':
-        if (!value) return 'Password is required';
-        if (value.length < 6) return 'Password must be at least 6 characters';
+        if (!value) return 'Mật khẩu là bắt buộc';
+        if (value.length < 6) return 'Mật khẩu phải có ít nhất 6 ký tự';
         return '';
       default:
         return '';
@@ -99,7 +103,9 @@ const Login = () => {
     const result = await login(formData.email, formData.password);
     
     if (result.success) {
-      navigate('/');
+      // Redirect to the page user came from, or home page
+      const redirectTo = location.state?.from || '/';
+      navigate(redirectTo);
     }
   };
 
@@ -129,13 +135,19 @@ const Login = () => {
       >
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Typography variant="h4" component="h1" gutterBottom color="primary">
-            Welcome Back
+            Chào Mừng Trở Lại
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Sign in to your DREAM COFFEE account
+            Đăng nhập vào tài khoản DREAM COFFEE của bạn
           </Typography>
         </Box>
 
+        {redirectMessage && (
+          <Alert severity="info" sx={{ mb: 2 }}>
+            {redirectMessage}
+          </Alert>
+        )}
+        
         {error && (
           <Alert severity="error" sx={{ mb: 2 }}>
             {error}
@@ -145,7 +157,7 @@ const Login = () => {
         <Box component="form" onSubmit={handleSubmit}>
           <TextField
             fullWidth
-            label="Email Address"
+            label="Địa Chỉ Email"
             name="email"
             type="email"
             value={formData.email}
@@ -168,7 +180,7 @@ const Login = () => {
 
           <TextField
             fullWidth
-            label="Password"
+            label="Mật Khẩu"
             name="password"
             type={showPassword ? 'text' : 'password'}
             value={formData.password}
@@ -188,7 +200,7 @@ const Login = () => {
               endAdornment: (
                 <InputAdornment position="end">
                   <IconButton
-                    aria-label="toggle password visibility"
+                    aria-label="hiển thị/ẩn mật khẩu"
                     onClick={togglePasswordVisibility}
                     edge="end"
                   >
@@ -210,20 +222,20 @@ const Login = () => {
             {loading ? (
               <CircularProgress size={24} color="inherit" />
             ) : (
-              'Sign In'
+              'Đăng Nhập'
             )}
           </Button>
 
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              Don't have an account?{' '}
+              Chưa có tài khoản?{' '}
               <Link
                 component={RouterLink}
                 to="/register"
                 color="primary"
                 sx={{ textDecoration: 'none', fontWeight: 'medium' }}
               >
-                Sign up here
+                Đăng ký tại đây
               </Link>
             </Typography>
           </Box>
