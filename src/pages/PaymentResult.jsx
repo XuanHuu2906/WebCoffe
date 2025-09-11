@@ -132,19 +132,20 @@ export default function PaymentResult() {
 
   const getStatusMessage = (responseCode) => {
     const statusMap = {
-      '00': 'Payment completed successfully',
-      '07': 'Transaction successful. Transaction is being deducted successfully. (Applicable to card/account payment)',
-      '09': 'Transaction failed: Your card/account has not registered for InternetBanking service at the bank.',
-      '10': 'Transaction failed: You have entered incorrect card/account information more than 3 times',
-      '11': 'Transaction failed: Payment deadline has expired. Please retry the transaction.',
-      '12': 'Transaction failed: Your card/account has been locked.',
-      '13': 'Transaction failed: You have entered incorrect transaction password. Please retry the transaction.',
-      '24': 'Transaction failed: Customer canceled the transaction',
-      '51': 'Transaction failed: Your account has insufficient balance to make the payment.',
-      '65': 'Transaction failed: Your account has exceeded the daily transaction limit.',
-      '75': 'Payment bank is under maintenance.',
-      '79': 'Transaction failed: You have entered incorrect payment password too many times. Please retry the transaction',
-      '99': 'Other errors'
+      '00': 'Thanh toán thành công',
+      '07': 'Giao dịch thành công. Giao dịch đang được trừ tiền thành công. (Áp dụng cho thanh toán bằng thẻ/tài khoản)',
+      '09': 'Giao dịch thất bại: Thẻ/tài khoản của bạn chưa đăng ký dịch vụ InternetBanking tại ngân hàng.',
+      '10': 'Giao dịch thất bại: Bạn đã nhập sai thông tin thẻ/tài khoản quá 3 lần.',
+      '11': 'Giao dịch thất bại: Hạn thanh toán đã hết. Vui lòng thực hiện lại giao dịch.',
+      '12': 'Giao dịch thất bại: Thẻ/tài khoản của bạn đã bị khóa.',
+      '13': 'Giao dịch thất bại: Bạn đã nhập sai mật khẩu giao dịch. Vui lòng thử lại.',
+      '24': 'Giao dịch thất bại: Khách hàng đã hủy giao dịch.',
+      '51': 'Giao dịch thất bại: Tài khoản của bạn không đủ số dư để thanh toán.',
+      '65': 'Giao dịch thất bại: Tài khoản của bạn đã vượt quá hạn mức giao dịch trong ngày.',
+      '75': 'Ngân hàng thanh toán đang bảo trì.',
+      '79': 'Giao dịch thất bại: Bạn đã nhập sai mật khẩu thanh toán quá nhiều lần. Vui lòng thử lại.',
+      '99': 'Lỗi khác'
+
     };
     return statusMap[responseCode] || 'Unknown error occurred';
   };
@@ -156,10 +157,10 @@ export default function PaymentResult() {
           <>
             <CircularProgress size={60} sx={{ color: '#8B4513', mb: 3 }} />
             <Typography variant="h4" gutterBottom>
-              Processing your payment...
+              Đang xử lý thanh toán của bạn...
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Please wait while we verify your payment with the bank.
+              Vui lòng chờ trong khi chúng tôi xác minh thanh toán của bạn với ngân hàng.
             </Typography>
           </>
         )}
@@ -168,10 +169,10 @@ export default function PaymentResult() {
           <>
             <CheckCircle sx={{ fontSize: 80, color: '#4caf50', mb: 3 }} />
             <Typography variant="h4" gutterBottom sx={{ color: '#4caf50' }}>
-              ✅ Payment Successful!
+              ✅ Thanh toán thành công!
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-              Your payment has been verified and processed successfully.
+              Thanh toán của bạn đã được xác minh và xử lý thành công.
             </Typography>
           </>
         )}
@@ -180,7 +181,7 @@ export default function PaymentResult() {
           <>
             <Error sx={{ fontSize: 80, color: '#f44336', mb: 3 }} />
             <Typography variant="h4" gutterBottom sx={{ color: '#f44336' }}>
-              ❌ Payment Failed!
+              ❌ Thanh toán thất bại!
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
               {paymentInfo?.responseCode ? getStatusMessage(paymentInfo.responseCode) : 'There was an issue processing your payment. Please try again.'}
@@ -193,36 +194,36 @@ export default function PaymentResult() {
           <Card sx={{ mb: 4, textAlign: 'left' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom sx={{ color: '#8B4513' }}>
-                Payment Details
+                Chi tiết thanh toán
               </Typography>
               <Box sx={{ display: 'grid', gap: 1 }}>
                 {paymentInfo.orderId && (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">Order ID:</Typography>
+                    <Typography variant="body2" color="text.secondary">Mã đơn hàng:</Typography>
                     <Typography variant="body2" fontWeight="bold">{paymentInfo.orderId}</Typography>
                   </Box>
                 )}
                 {paymentInfo.transactionNo && (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">Transaction No:</Typography>
+                    <Typography variant="body2" color="text.secondary">Số giao dịch:</Typography>
                     <Typography variant="body2" fontWeight="bold">{paymentInfo.transactionNo}</Typography>
                   </Box>
                 )}
                 {paymentInfo.amount && (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">Amount:</Typography>
+                    <Typography variant="body2" color="text.secondary">Số tiền:</Typography>
                     <Typography variant="body2" fontWeight="bold">{formatPrice(paymentInfo.amount)}</Typography>
                   </Box>
                 )}
                 {paymentInfo.bankCode && (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">Bank Code:</Typography>
+                    <Typography variant="body2" color="text.secondary">Mã ngân hàng:</Typography>
                     <Typography variant="body2" fontWeight="bold">{paymentInfo.bankCode}</Typography>
                   </Box>
                 )}
                 {paymentInfo.payDate && (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <Typography variant="body2" color="text.secondary">Payment Date:</Typography>
+                    <Typography variant="body2" color="text.secondary">Ngày thanh toán:</Typography>
                     <Typography variant="body2" fontWeight="bold">
                       {(() => {
                         // Format VNPay date (YYYYMMDDHHMMSS) to readable format
@@ -244,24 +245,24 @@ export default function PaymentResult() {
                 {orderDetails && (
                   <>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="body2" color="text.secondary">Payment Status:</Typography>
+                      <Typography variant="body2" color="text.secondary">Trạng thái thanh toán:</Typography>
                       <Typography 
                         variant="body2" 
                         fontWeight="bold"
                         sx={{ color: orderDetails.paymentStatus === 'paid' ? '#4caf50' : '#f44336' }}
                       >
-                        {orderDetails.paymentStatus === 'paid' ? 'Paid' : 'Failed'}
+                        {orderDetails.paymentStatus === 'paid' ? 'Thành Công' : 'Thất Bại'}
                       </Typography>
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Typography variant="body2" color="text.secondary">Payment Method:</Typography>
+                      <Typography variant="body2" color="text.secondary">Phương thức thanh toán:</Typography>
                       <Typography variant="body2" fontWeight="bold">
                         {orderDetails.paymentDetails?.method || orderDetails.paymentMethod || 'VNPay'}
                       </Typography>
                     </Box>
                     {orderDetails.paymentDetails?.paidAt && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Typography variant="body2" color="text.secondary">Paid At:</Typography>
+                        <Typography variant="body2" color="text.secondary">Thanh toán lúc:</Typography>
                         <Typography variant="body2" fontWeight="bold">
                           {new Date(orderDetails.paymentDetails.paidAt).toLocaleString()}
                         </Typography>
@@ -275,7 +276,7 @@ export default function PaymentResult() {
               {orderDetails && orderDetails.items && orderDetails.items.length > 0 && (
                 <>
                   <Typography variant="h6" gutterBottom sx={{ color: '#8B4513', mt: 3, mb: 2 }}>
-                    Order Items
+                    Các sản phẩm trong đơn hàng
                   </Typography>
                   <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
                     {orderDetails.items.map((item, index) => (
@@ -307,28 +308,28 @@ export default function PaymentResult() {
               {orderDetails && (
                 <>
                   <Typography variant="h6" gutterBottom sx={{ color: '#8B4513', mt: 3, mb: 2 }}>
-                    Customer Information
+                    Thông tin khách hàng
                   </Typography>
                   <Box sx={{ display: 'grid', gap: 1 }}>
                     {orderDetails.orderType && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Typography variant="body2" color="text.secondary">Order Type:</Typography>
+                        <Typography variant="body2" color="text.secondary">Loại đơn hàng:</Typography>
                         <Typography variant="body2" fontWeight="bold">
-                          {orderDetails.orderType === 'delivery' ? 'Delivery' : 'Pickup'}
+                          {orderDetails.orderType === 'delivery' ? 'Vận Chuyển' : 'Lấy tại quán'}
                         </Typography>
                       </Box>
                     )}
                     {orderDetails.deliveryAddress && (
                       <>
                         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <Typography variant="body2" color="text.secondary">Delivery Address:</Typography>
+                          <Typography variant="body2" color="text.secondary">Địa chỉ giao hàng:</Typography>
                           <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
                             {orderDetails.deliveryAddress.street}, {orderDetails.deliveryAddress.city} {orderDetails.deliveryAddress.zipCode}
                           </Typography>
                         </Box>
                         {orderDetails.deliveryAddress.instructions && (
                           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <Typography variant="body2" color="text.secondary">Instructions:</Typography>
+                            <Typography variant="body2" color="text.secondary">Hướng dẫn:</Typography>
                             <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
                               {orderDetails.deliveryAddress.instructions}
                             </Typography>
@@ -338,7 +339,7 @@ export default function PaymentResult() {
                     )}
                     {orderDetails.notes && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Typography variant="body2" color="text.secondary">Order Notes:</Typography>
+                        <Typography variant="body2" color="text.secondary">Ghi chú đơn hàng:</Typography>
                         <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
                           {orderDetails.notes}
                         </Typography>
@@ -346,7 +347,7 @@ export default function PaymentResult() {
                     )}
                     {orderDetails.createdAt && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Typography variant="body2" color="text.secondary">Order Created:</Typography>
+                        <Typography variant="body2" color="text.secondary">Đơn hàng đã được tạo:</Typography>
                         <Typography variant="body2" fontWeight="bold">
                           {new Date(orderDetails.createdAt).toLocaleString('en-US', {
                             year: 'numeric',
@@ -373,7 +374,7 @@ export default function PaymentResult() {
             onClick={handleGoHome}
             startIcon={<ArrowBack />}
           >
-            Continue Shopping
+            Tiếp tục mua sắm
           </Button>
           {isAuthenticated ? (
             <Button
@@ -385,12 +386,12 @@ export default function PaymentResult() {
                 '&:hover': { backgroundColor: '#A0522D' }
               }}
             >
-              View Orders
+              Xem đơn hàng
             </Button>
           ) : (
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                Want to track your order? Please log in to view order details.
+                Bạn muốn theo dõi đơn hàng của mình? Vui lòng đăng nhập để xem chi tiết đơn hàng.
               </Typography>
               <Button
                 variant="contained"
@@ -400,7 +401,7 @@ export default function PaymentResult() {
                   '&:hover': { backgroundColor: '#1565c0' }
                 }}
               >
-                Login to View Orders
+                Đăng nhập để xem đơn hàng
               </Button>
             </Box>
           )}

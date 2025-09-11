@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cart Cleanup Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .danger {
+            background-color: #dc3545;
+        }
+        .danger:hover {
+            background-color: #c82333;
+        }
+        .success {
+            background-color: #28a745;
+        }
+        .output {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WebCaffe Cart Cleanup Tool</h1>
+        <p>This tool helps clean invalid product IDs from your cart storage.</p>
+        
+        <div class="warning">
+            <strong>Warning:</strong> This tool will remove invalid products from your cart. Make sure you have the WebCaffe application closed before running cleanup.
+        </div>
+        
+        <div>
+            <button class="button" onclick="checkCartStorage()">Check Cart Storage</button>
+            <button class="button" onclick="removeSpecificProduct()">Remove Invalid Product ID</button>
+            <button class="button danger" onclick="clearAllCartStorage()">Clear All Cart Data</button>
+        </div>
+        
+        <div id="output" class="output"></div>
+    </div>
+
+    <script>
+        const INVALID_PRODUCT_ID = '68b1ccea959356e6d0034818';
+        
+        function log(message) {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearOutput() {
+            document.getElementById('output').textContent = '';
+        }
+        
+        function checkCartStorage() {
+            clearOutput();
+            log('Checking cart storage...');
+            
+            const keys = Object.keys(localStorage);
+            const cartKeys = keys.filter(key => 
+                key.includes('dreamcoffee_cart') || key.includes('pendingCartItems')
+            );
+            
+            log(`Found ${cartKeys.length} cart storage keys`);
+            
+            let totalItems = 0;
+            let invalidItemsFound = 0;
+            
+            cartKeys.forEach(key => {
+                try {
+                    const data = localStorage.getItem(key);
+                    if (!data) {
+                        log(`${key}: No data`);
+                        return;
+                    }
+                    
+                    const cartData = JSON.parse(data);
+                    let items = [];
+                    
+                    if (cartData.items && Array.isArray(cartData.items)) {
+                        items = cartData.items;
+                    } else if (Array.isArray(cartData)) {
+                        items = cartData;
+                    }
+                    
+                    log(`${key}: ${items.length} items`);
+                    totalItems += items.length;
+                    
+                    items.forEach((item, index) => {
+                        const productId = item.product?._id;
+                        const productName = item.product?.name || 'Unknown';
+                        log(`  Item ${index + 1}: ${productName} (ID: ${productId})`);
+                        
+                        if (productId === INVALID_PRODUCT_ID) {
+                            log(`    ⚠️  INVALID PRODUCT FOUND!`);
+                            invalidItemsFound++;
+                        }
+                    });
+                    
+                } catch (error) {
+                    log(`${key}: Error parsing data - ${error.message}`);
+                }
+            });
+            
+            log(`\nSummary:`);
+            log(`Total cart keys: ${cartKeys.length}`);
+            log(`Total items: ${totalItems}`);
+            log(`Invalid items found: ${invalidItemsFound}`);
+            
+            if (invalidItemsFound > 0) {
+                log(`\n🚨 Found ${invalidItemsFound} invalid product(s). Click 'Remove Invalid Product ID' to clean them.`);
+            } else {
+                log(`\n✅ No invalid products found in cart storage.`);
+            }
+        }
+        
+        function removeSpecificProduct() {
+            clearOutput();
+            log(`Removing invalid product ID: ${INVALID_PRODUCT_ID}`);
+            
+            const keys = Object.keys(localStorage);
+            const cartKeys = keys.filter(key => 
+                key.includes('dreamcoffee_cart') || key.includes('pendingCartItems')
+            );
+            
+            let removedCount = 0;
+            
+            cartKeys.forEach(key => {
+                try {
+                    const data = localStorage.getItem(key);
+                    if (!data || !data.includes(INVALID_PRODUCT_ID)) {
+                        return;
+                    }
+                    
+                    const cartData = JSON.parse(data);
+                    let items = [];
+                    let wasModified = false;
+                    
+                    if (cartData.items && Array.isArray(cartData.items)) {
+                        const originalLength = cartData.items.length;
+                        items = cartData.items.filter(item => item.product?._id !== INVALID_PRODUCT_ID);
+                        wasModified = items.length !== originalLength;
+                        removedCount += originalLength - items.length;
+                    } else if (Array.isArray(cartData)) {
+                        const originalLength = cartData.length;
+                        items = cartData.filter(item => item.product?._id !== INVALID_PRODUCT_ID);
+                        wasModified = items.length !== originalLength;
+                        removedCount += originalLength - items.length;
+                    }
+                    
+                    if (wasModified) {
+                        if (items.length > 0) {
+                            if (cartData.items) {
+                                // Standard cart format
+                                const validTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                                const validItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+                                
+                                const updatedCartData = {
+                                    ...cartData,
+                                    items: items,
+                                    total: validTotal,
+                                    itemCount: validItemCount
+                                };
+                                
+                                localStorage.setItem(key, JSON.stringify(updatedCartData));
+                            } else {
+                                // Pending items format
+                                localStorage.setItem(key, JSON.stringify(items));
+                            }
+                        } else {
+                            // No items left, remove the key
+                            localStorage.removeItem(key);
+                            log(`Removed empty cart key: ${key}`);
+                        }
+                        
+                        log(`Cleaned invalid product from: ${key}`);
+                    }
+                } catch (error) {
+                    log(`Error cleaning ${key}: ${error.message}`);
+                }
+            });
+            
+            log(`\n✅ Cleanup completed. Removed ${removedCount} invalid product(s).`);
+            
+            if (removedCount > 0) {
+                log('\n🔄 Please refresh the WebCaffe application to see the changes.');
+            }
+        }
+        
+        function clearAllCartStorage() {
+            if (!confirm('Are you sure you want to clear ALL cart data? This cannot be undone.')) {
+                return;
+            }
+            
+            clearOutput();
+            log('Clearing all cart storage...');
+            
+            const keys = Object.keys(localStorage);
+            const cartKeys = keys.filter(key => 
+                key.includes('dreamcoffee_cart') || key.includes('pendingCartItems')
+            );
+            
+            cartKeys.forEach(key => {
+                localStorage.removeItem(key);
+                log(`Removed: ${key}`);
+            });
+            
+            log(`\n✅ Cleared ${cartKeys.length} cart storage key(s).`);
+            log('\n🔄 Please refresh the WebCaffe application.');
+        }
+        
+        // Auto-check on page load
+        window.addEventListener('load', () => {
+            log('Cart Cleanup Tool loaded');
+            log('Click "Check Cart Storage" to analyze your cart data.');
+        });
+    </script>
+</body>
+</html>
