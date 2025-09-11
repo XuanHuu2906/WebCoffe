@@ -99,10 +99,10 @@ const CheckoutResult = () => {
         <Paper elevation={3} sx={{ p: 6, maxWidth: 500, mx: 'auto' }}>
           <CircularProgress size={60} sx={{ color: '#8B4513', mb: 3 }} />
           <Typography variant="h5" gutterBottom>
-            Processing Payment Result...
+            Đang xử lý kết quả thanh toán...
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Please wait while we verify your payment.
+            Vui lòng đợi trong khi chúng tôi xác nhận thanh toán của bạn.
           </Typography>
         </Paper>
       </Container>
@@ -115,7 +115,7 @@ const CheckoutResult = () => {
         <Paper elevation={3} sx={{ p: 6, maxWidth: 600, mx: 'auto', textAlign: 'center' }}>
           <Error sx={{ fontSize: 80, color: '#f44336', mb: 3 }} />
           <Typography variant="h4" gutterBottom sx={{ color: '#f44336' }}>
-            Payment Error
+            Lỗi Thanh Toán
           </Typography>
           <Alert severity="error" sx={{ mb: 3, textAlign: 'left' }}>
             {error}
@@ -126,7 +126,7 @@ const CheckoutResult = () => {
               onClick={handleGoHome}
               startIcon={<ArrowBack />}
             >
-              Go Home
+              Về Trang Chủ
             </Button>
             <Button
               variant="contained"
@@ -137,7 +137,7 @@ const CheckoutResult = () => {
                 '&:hover': { backgroundColor: '#A0522D' }
               }}
             >
-              View Orders
+              Xem đơn hàng
             </Button>
           </Box>
         </Paper>
@@ -152,20 +152,20 @@ const CheckoutResult = () => {
           <>
             <CheckCircle sx={{ fontSize: 80, color: '#4caf50', mb: 3 }} />
             <Typography variant="h4" gutterBottom sx={{ color: '#4caf50' }}>
-              Payment Successful!
+              Thanh Toán Thành Công!
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-              Your payment has been processed successfully and your order is confirmed.
+              Thanh toán của bạn đã được xử lý thành công và đơn hàng của bạn đã được xác nhận.
             </Typography>
           </>
         ) : (
           <>
             <Error sx={{ fontSize: 80, color: '#f44336', mb: 3 }} />
             <Typography variant="h4" gutterBottom sx={{ color: '#f44336' }}>
-              Payment Failed
+              Lỗi Thanh Toán
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
-              {paymentResult?.message || 'Your payment could not be processed.'}
+              {paymentResult?.message || 'Thanh toán của bạn không thể được xử lý.'}
             </Typography>
           </>
         )}
@@ -174,7 +174,7 @@ const CheckoutResult = () => {
         <Card sx={{ mb: 4, textAlign: 'left' }}>
           <CardContent>
             <Typography variant="h6" gutterBottom sx={{ color: '#8B4513' }}>
-              Order Details
+              Chi Tiết Đơn Hàng
             </Typography>
             <Box sx={{ display: 'grid', gap: 1 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -194,7 +194,7 @@ const CheckoutResult = () => {
                 </Box>
               )}
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                <Typography variant="body2" color="text.secondary">Payment Status:</Typography>
+                <Typography variant="body2" color="text.secondary">Trạng Thái Thanh Toán:</Typography>
                 <Typography 
                   variant="body2" 
                   fontWeight="bold"
@@ -213,6 +213,98 @@ const CheckoutResult = () => {
                   {paymentResult?.orderStatus === 'confirmed' ? 'Confirmed' : paymentResult?.orderStatus || 'Pending'}
                 </Typography>
               </Box>
+
+              {/* Order Items */}
+              {paymentResult?.order?.items && paymentResult.order.items.length > 0 && (
+                <>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#8B4513', mt: 3, mb: 2 }}>
+                    Order Items
+                  </Typography>
+                  <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
+                    {paymentResult.order.items.map((item, index) => (
+                      <Box key={index} sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        py: 1,
+                        borderBottom: index < paymentResult.order.items.length - 1 ? '1px solid #eee' : 'none'
+                      }}>
+                        <Box>
+                          <Typography variant="body2" fontWeight="bold">
+                            {item.name} ({item.size || 'Regular'})
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {item.quantity} x {formatPrice(item.price || 0)}
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" fontWeight="bold">
+                          {formatPrice((item.price || 0) * (item.quantity || 0))}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </>
+              )}
+
+              {/* Customer Information */}
+              {paymentResult?.order && (
+                <>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#8B4513', mt: 3, mb: 2 }}>
+                    Thông Tin Khách Hàng
+                  </Typography>
+                  <Box sx={{ display: 'grid', gap: 1 }}>
+                    {paymentResult.order.orderType && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" color="text.secondary">Order Type:</Typography>
+                        <Typography variant="body2" fontWeight="bold">
+                          {paymentResult.order.orderType === 'delivery' ? 'Delivery' : 'Pickup'}
+                        </Typography>
+                      </Box>
+                    )}
+                    {paymentResult.order.deliveryAddress && (
+                      <>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2" color="text.secondary">Delivery Address:</Typography>
+                          <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
+                            {paymentResult.order.deliveryAddress.street}, {paymentResult.order.deliveryAddress.city} {paymentResult.order.deliveryAddress.zipCode}
+                          </Typography>
+                        </Box>
+                        {paymentResult.order.deliveryAddress.instructions && (
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2" color="text.secondary">Instructions:</Typography>
+                            <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
+                              {paymentResult.order.deliveryAddress.instructions}
+                            </Typography>
+                          </Box>
+                        )}
+                      </>
+                    )}
+                    {paymentResult.order.notes && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" color="text.secondary">Order Notes:</Typography>
+                        <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
+                          {paymentResult.order.notes}
+                        </Typography>
+                      </Box>
+                    )}
+                    {paymentResult.order.createdAt && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" color="text.secondary">Order Created:</Typography>
+                        <Typography variant="body2" fontWeight="bold">
+                          {new Date(paymentResult.order.createdAt).toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                          })}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </>
+              )}
             </Box>
           </CardContent>
         </Card>
@@ -224,7 +316,7 @@ const CheckoutResult = () => {
             onClick={handleGoHome}
             startIcon={<ArrowBack />}
           >
-            Continue Shopping
+            Tiếp Tục Mua Sắm
           </Button>
           <Button
             variant="contained"
@@ -235,7 +327,7 @@ const CheckoutResult = () => {
               '&:hover': { backgroundColor: '#A0522D' }
             }}
           >
-            View Orders
+            Xem Đơn Hàng
           </Button>
         </Box>
       </Paper>

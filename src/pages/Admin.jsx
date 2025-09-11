@@ -458,6 +458,14 @@ const Admin = () => {
       if (data.success) {
         // Refresh orders list
         fetchOrders();
+        
+        // Refresh dashboard stats if order status affects revenue (completed/ready orders)
+        if (newStatus === 'completed' || newStatus === 'ready') {
+          fetchDashboardStats();
+          fetchRecentOrders();
+          fetchRevenueData();
+        }
+        
         setError(null);
       }
     } catch (error) {
@@ -474,6 +482,22 @@ const Admin = () => {
       fetchRevenueData();
     }
   }, [user]);
+
+  // Auto-refresh dashboard stats every 30 seconds to catch payment updates
+  useEffect(() => {
+    if (user && user.role === 'admin') {
+      const interval = setInterval(() => {
+        // Only refresh if we're on the dashboard tab (tab 0)
+        if (currentTab === 0) {
+          fetchDashboardStats();
+          fetchRecentOrders();
+          fetchRevenueData();
+        }
+      }, 30000); // Refresh every 30 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [user, currentTab]);
 
   // Fetch orders when tab changes to orders or filters change
   useEffect(() => {

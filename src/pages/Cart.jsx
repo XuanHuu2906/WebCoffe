@@ -47,7 +47,9 @@ import {
   LocationOn,
   Phone,
   Email,
-  Person
+  Person,
+  CheckCircle,
+  Receipt
 } from '@mui/icons-material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext.jsx';
@@ -87,7 +89,7 @@ const Cart = () => {
     email: user?.email || '',
     address: '',
     city: '',
-    zipCode: '',
+    district: '',
     instructions: ''
   });
   
@@ -995,15 +997,160 @@ const Cart = () => {
 
   // Order success message
   if (orderSuccess) {
+    const cartSummary = getCartSummary();
+    const finalTotals = getFinalTotals();
+    const currentDateTime = new Date().toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
+    const getPaymentMethodDisplay = (method) => {
+      switch (method) {
+        case 'card': return 'Thẻ tín dụng/Ghi nợ';
+        case 'momo': return 'Ví MoMo';
+        case 'cash': return 'Tiền mặt';
+        case 'wallet': return 'Ví điện tử';
+        default: return 'Không xác định';
+      }
+    };
+
     return (
       <Container sx={{ py: 4, textAlign: 'center' }}>
-        <Paper elevation={3} sx={{ p: 6, maxWidth: 500, mx: 'auto' }}>
+        <Paper elevation={3} sx={{ p: 6, maxWidth: 700, mx: 'auto' }}>
+          {/* Success Icon and Message */}
+          <CheckCircle sx={{ fontSize: 80, color: '#4caf50', mb: 3 }} />
           <Typography variant="h4" gutterBottom sx={{ color: '#4caf50' }}>
             Thanh toán thành công!
           </Typography>
-          <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-            Cảm ơn bạn đã đặt hàng. Bạn sẽ được chuyển hướng đến trang lịch sử đơn hàng trong vài giây.
+          <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+            Cảm ơn bạn đã đặt hàng. Đơn hàng của bạn đã được xác nhận và đang được xử lý.
           </Typography>
+
+          {/* Payment Details Card */}
+          <Card sx={{ mb: 4, textAlign: 'left' }}>
+            <CardContent>
+              <Typography variant="h6" gutterBottom sx={{ color: '#8B4513', mb: 3 }}>
+                Chi tiết thanh toán
+              </Typography>
+              <Box sx={{ display: 'grid', gap: 2 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">Phương thức thanh toán:</Typography>
+                  <Typography variant="body2" fontWeight="bold">{getPaymentMethodDisplay(paymentMethod)}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">Tổng tiền:</Typography>
+                  <Typography variant="body2" fontWeight="bold" sx={{ color: '#8B4513' }}>
+                    {formatPrice(finalTotals.total)}
+                  </Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">Thời gian đặt hàng:</Typography>
+                  <Typography variant="body2" fontWeight="bold">{currentDateTime}</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">Hình thức nhận hàng:</Typography>
+                  <Typography variant="body2" fontWeight="bold">
+                    {orderType === 'delivery' ? 'Giao hàng tận nơi' : 'Nhận tại cửa hàng'}
+                  </Typography>
+                </Box>
+                {appliedPromo && (
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="body2" color="text.secondary">Mã giảm giá:</Typography>
+                    <Typography variant="body2" fontWeight="bold" sx={{ color: '#4caf50' }}>
+                      {appliedPromo.code} (-{formatPrice(finalTotals.discount)})
+                    </Typography>
+                  </Box>
+                )}
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">Số lượng món:</Typography>
+                  <Typography variant="body2" fontWeight="bold">{itemCount} món</Typography>
+                </Box>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">Trạng thái thanh toán:</Typography>
+                  <Typography variant="body2" fontWeight="bold" sx={{ color: '#4caf50' }}>Đã thanh toán</Typography>
+                </Box>
+              </Box>
+
+              {/* Order Items Summary */}
+              <Typography variant="h6" gutterBottom sx={{ color: '#8B4513', mt: 3, mb: 2 }}>
+                Món đã đặt
+              </Typography>
+              <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
+                {items.map((item, index) => (
+                  <Box key={index} sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center',
+                    py: 1,
+                    borderBottom: index < items.length - 1 ? '1px solid #eee' : 'none'
+                  }}>
+                    <Box>
+                      <Typography variant="body2" fontWeight="bold">
+                        {item.product.name} ({item.size || 'Regular'})
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {item.quantity} x {formatPrice(item.price)}
+                      </Typography>
+                    </Box>
+                    <Typography variant="body2" fontWeight="bold">
+                      {formatPrice(item.price * item.quantity)}
+                    </Typography>
+                  </Box>
+                ))}
+              </Box>
+
+              {/* Delivery Information */}
+              {orderType === 'delivery' && deliveryInfo.address && (
+                <>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#8B4513', mt: 3, mb: 2 }}>
+                    Thông tin giao hàng
+                  </Typography>
+                  <Box sx={{ display: 'grid', gap: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.secondary">Người nhận:</Typography>
+                      <Typography variant="body2" fontWeight="bold">{deliveryInfo.fullName}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.secondary">Số điện thoại:</Typography>
+                      <Typography variant="body2" fontWeight="bold">{deliveryInfo.phone}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="body2" color="text.secondary">Địa chỉ:</Typography>
+                      <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
+                        {deliveryInfo.address}, {deliveryInfo.city} {deliveryInfo.zipCode}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Action Buttons */}
+          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Button
+              variant="outlined"
+              onClick={() => navigate('/')}
+              startIcon={<ArrowBack />}
+            >
+              Tiếp tục mua sắm
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => navigate('/orders')}
+              startIcon={<Receipt />}
+              sx={{
+                backgroundColor: '#8B4513',
+                '&:hover': { backgroundColor: '#A0522D' }
+              }}
+            >
+              Xem đơn hàng
+            </Button>
+          </Box>
         </Paper>
       </Container>
     );
@@ -1487,7 +1634,7 @@ const Cart = () => {
                         <CardMedia
                           component="img"
                           height="330"
-                          image={product.image ? `${import.meta.env.VITE_API_URL || 'http://localhost:5004'}${product.image}` : '/api/placeholder/300/200'}
+                          image={product.imageUrl || (product.image ? (product.image.startsWith('http') ? product.image : `${import.meta.env.VITE_API_URL || 'http://localhost:5004'}${product.image}`) : `https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop&auto=format`)}
                           alt={product.name}
                           sx={{ objectFit: 'cover', backgroundColor: '#f5f5f5' }}
                         />
@@ -1627,7 +1774,7 @@ const Cart = () => {
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="Full Name *"
+                      label="Họ Tên *"
                       value={deliveryInfo.fullName}
                       onChange={(e) => handleDeliveryInfoChange('fullName', e.target.value)}
                       error={!!validationErrors.fullName}
@@ -1644,7 +1791,7 @@ const Cart = () => {
                   <Grid item xs={12} sm={6}>
                     <TextField
                       fullWidth
-                      label="Phone Number *"
+                      label="Số Điện Thoại *"
                       value={deliveryInfo.phone}
                       onChange={(e) => handleDeliveryInfoChange('phone', e.target.value)}
                       error={!!validationErrors.phone}
@@ -1661,7 +1808,7 @@ const Cart = () => {
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
-                      label="Email Address *"
+                      label="Email *"
                       type="email"
                       value={deliveryInfo.email}
                       onChange={(e) => handleDeliveryInfoChange('email', e.target.value)}
@@ -1682,7 +1829,7 @@ const Cart = () => {
                       <Grid item xs={12}>
                         <TextField
                           fullWidth
-                          label="Street Address *"
+                          label="Địa Chỉ *"
                           value={deliveryInfo.address}
                           onChange={(e) => handleDeliveryInfoChange('address', e.target.value)}
                           error={!!validationErrors.address}
@@ -1699,11 +1846,21 @@ const Cart = () => {
                       <Grid item xs={12} sm={6}>
                         <TextField
                           fullWidth
-                          label="City *"
+                          label="Thành Phố *"
                           value={deliveryInfo.city}
                           onChange={(e) => handleDeliveryInfoChange('city', e.target.value)}
                           error={!!validationErrors.city}
                           helperText={validationErrors.city}
+                        />
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          fullWidth
+                          label="Quận Huyện *"
+                          value={deliveryInfo.district}
+                          onChange={(e) => handleDeliveryInfoChange('district', e.target.value)}
+                          error={!!validationErrors.district}
+                          helperText={validationErrors.district}
                         />
                       </Grid>
                       <Grid item xs={12}>
@@ -1711,7 +1868,7 @@ const Cart = () => {
                           fullWidth
                           multiline
                           rows={2}
-                          label="Delivery Instructions (Optional)"
+                          label="Ghi Chú (Tùy Chọn)"
                           value={deliveryInfo.instructions}
                           onChange={(e) => handleDeliveryInfoChange('instructions', e.target.value)}
                           placeholder="Apartment number, gate code, special instructions..."
@@ -1727,7 +1884,7 @@ const Cart = () => {
             {activeStep === 2 && (
               <Box>
                 <Typography variant="h6" gutterBottom>
-                  Payment Method
+                  Phương Thức Thanh Toán
                 </Typography>
                 
                 <FormControl component="fieldset" sx={{ mb: 3 }}>
@@ -1741,7 +1898,7 @@ const Cart = () => {
                       label={
                         <Box display="flex" alignItems="center" gap={1}>
                           <CreditCard />
-                          Credit/Debit Card
+                          Thẻ Tín Dụng
                         </Box>
                       }
                     />
@@ -1761,7 +1918,7 @@ const Cart = () => {
                       label={
                         <Box display="flex" alignItems="center" gap={1}>
                           <AccountBalanceWallet />
-                          MoMo E-Wallet
+                          MoMo
                         </Box>
                       }
                     />
@@ -1779,7 +1936,7 @@ const Cart = () => {
                 </FormControl>
 
                 <Typography variant="h6" gutterBottom>
-                  Order Summary
+                  Tóm Tắt Đơn Hàng
                 </Typography>
                 {items.map((item) => (
                   <Box key={item.id} sx={{ mb: 2, p: 2, border: '1px solid #e0e0e0', borderRadius: 1 }}>
@@ -1819,10 +1976,10 @@ const Cart = () => {
                   fullWidth
                   multiline
                   rows={3}
-                  label="Order Notes (Optional)"
+                  label="Ghi Chú (Tùy Chọn)"
                   value={orderNotes}
                   onChange={(e) => setOrderNotes(e.target.value)}
-                  placeholder="Any special instructions for your order..."
+                  placeholder="Ghi chú cho đơn hàng..."
                   sx={{ mb: 2 }}
                 />
               </Box>
@@ -1860,7 +2017,7 @@ const Cart = () => {
                 '&:hover': { backgroundColor: '#A0522D' }
               }}
             >
-              {isProcessing ? 'Processing...' : 'Place Order'}
+              {isProcessing ? 'Đang thanh toán...' : 'Thanh Toán'}
             </Button>
           )}
         </DialogActions>

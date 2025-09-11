@@ -20,7 +20,7 @@ import {
   InputLabel
 } from '@mui/material';
 import { Search, Add, Remove } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useProducts } from '../contexts/ProductContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -28,9 +28,11 @@ import { formatPrice } from '../utils/formatPrice';
 
 const Menu = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [selectedSize, setSelectedSize] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
   
   const { 
     products, 
@@ -50,6 +52,18 @@ const Menu = () => {
   useEffect(() => {
     fetchProducts({ limit: 100 }); // Fetch all products without pagination limit
   }, [fetchProducts]);
+
+  // Handle success message from navigation state
+  useEffect(() => {
+    if (location.state?.message && location.state?.type === 'success') {
+      setSuccessMessage(location.state.message);
+      // Clear the message after 5 seconds
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   // Handle search
   const handleSearch = (event) => {
@@ -93,19 +107,48 @@ const Menu = () => {
 
   // Add item to cart
   const handleAddToCart = (product) => {
+    const size = selectedSize[product._id];
+    
     // Check if user is authenticated
     if (!isAuthenticated) {
-      // Redirect to login page
+      // Store pending cart item in localStorage
+      const pendingItem = {
+        product,
+        quantity: 1,
+        size: size || 'Regular',
+        timestamp: Date.now()
+      };
+      
+      // Get existing pending items
+      const existingPending = JSON.parse(localStorage.getItem('pendingCartItems') || '[]');
+      
+      // Check if item already exists in pending cart
+      const existingIndex = existingPending.findIndex(
+        item => item.product._id === product._id && item.size === (size || 'Regular')
+      );
+      
+      if (existingIndex >= 0) {
+        // Update quantity if item exists
+        existingPending[existingIndex].quantity += 1;
+        existingPending[existingIndex].timestamp = Date.now();
+      } else {
+        // Add new item to pending cart
+        existingPending.push(pendingItem);
+      }
+      
+      // Save updated pending cart
+      localStorage.setItem('pendingCartItems', JSON.stringify(existingPending));
+      
+      // Redirect to login page with message
       navigate('/login', { 
         state: { 
           from: '/menu',
-          message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng'
+          message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng. Sản phẩm sẽ được tự động thêm vào giỏ hàng sau khi đăng nhập.'
         }
       });
       return;
     }
     
-    const size = selectedSize[product._id];
     addToCart(product, 1, size);
   };
 
@@ -193,6 +236,17 @@ const Menu = () => {
       >
         Menu
       </Typography>
+
+      {/* Success Message */}
+      {successMessage && (
+        <Alert 
+          severity="success" 
+          sx={{ mb: 3 }}
+          onClose={() => setSuccessMessage('')}
+        >
+          {successMessage}
+        </Alert>
+      )}
 
       {/* Search and Filter Controls */}
       <Box sx={{ mb: 4 }}>

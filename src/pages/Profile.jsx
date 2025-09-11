@@ -82,7 +82,7 @@ const Profile = () => {
       if (!/\S+@\S+\.\S+/.test(value)) return 'Vui lòng nhập địa chỉ email hợp lệ';
         return '';
       case 'phone':
-        if (value && !/^[\+]?[1-9][\d]{0,15}$/.test(value.replace(/[\s\-\(\)]/g, ''))) {
+        if (value && !/^\d{10}$/.test(value.replace(/[\s\-\(\)]/g, ''))) {
           return 'Vui lòng nhập số điện thoại hợp lệ';
         }
         return '';
@@ -91,11 +91,6 @@ const Profile = () => {
       case 'city':
         return '';
       case 'state':
-        return '';
-      case 'zipCode':
-        if (value && !/^\d{5}(-\d{4})?$/.test(value)) {
-          return 'Vui lòng nhập mã bưu điện hợp lệ (ví dụ: 12345 hoặc 12345-6789)';
-        }
         return '';
       default:
         return '';
@@ -274,7 +269,18 @@ const Profile = () => {
       firstName: user.firstName || '',
       lastName: user.lastName || '',
       email: user.email || '',
-      phone: user.phone || ''
+      phone: user.phone || '',
+      address: {
+        street: user.address?.street || '',
+        city: user.address?.city || '',
+        state: user.address?.state || '',
+        zipCode: user.address?.zipCode || '',
+        country: user.address?.country || 'USA'
+      },
+      preferences: {
+        newsletter: user.preferences?.newsletter || false,
+        notifications: user.preferences?.notifications !== undefined ? user.preferences.notifications : true
+      }
     });
     setProfileTouched({});
     setProfileErrors({});
@@ -380,7 +386,7 @@ const Profile = () => {
                 {user.email}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Member since {new Date(user.createdAt).toLocaleDateString()}
+                Thành viên từ {new Date(user.createdAt).toLocaleDateString()}
               </Typography>
             </Box>
           </Grid>
@@ -532,20 +538,6 @@ const Profile = () => {
                     variant="outlined"
                     error={isEditing && profileTouched.state && !!profileErrors.state}
                     helperText={isEditing && profileTouched.state && profileErrors.state}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={3}>
-                  <TextField
-                    fullWidth
-                    label="Mã Bưu Điện"
-                    name="address.zipCode"
-                    value={profileData.address.zipCode}
-                    onChange={handleProfileChange}
-                    onBlur={handleProfileBlur}
-                    disabled={!isEditing || loading}
-                    variant="outlined"
-                    error={isEditing && profileTouched.zipCode && !!profileErrors.zipCode}
-                    helperText={isEditing && profileTouched.zipCode && profileErrors.zipCode}
                   />
                 </Grid>
               </Grid>

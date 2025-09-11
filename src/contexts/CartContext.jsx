@@ -242,6 +242,36 @@ const cartStorage = {
   }
 };
 
+// Function to process pending cart items from localStorage
+const processPendingCartItems = () => {
+  try {
+    const pendingItemsStr = localStorage.getItem('pendingCartItems');
+    if (!pendingItemsStr) return [];
+    
+    const pendingItems = JSON.parse(pendingItemsStr);
+    
+    // Clear pending items from localStorage after processing
+    localStorage.removeItem('pendingCartItems');
+    
+    // Convert pending items to cart format
+    const cartItems = pendingItems.map(pendingItem => ({
+      id: `${pendingItem.product._id}-${pendingItem.size}`,
+      product: pendingItem.product,
+      size: pendingItem.size,
+      quantity: pendingItem.quantity,
+      price: pendingItem.product.price
+    }));
+    
+    console.log('Processed pending cart items:', cartItems);
+    return cartItems;
+  } catch (error) {
+    console.error('Error processing pending cart items:', error);
+    // Clear corrupted data
+    localStorage.removeItem('pendingCartItems');
+    return [];
+  }
+};
+
 // Cart Provider Component
 export const CartProvider = ({ children }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
@@ -275,14 +305,18 @@ export const CartProvider = ({ children }) => {
           // Get user's existing cart
           const userCartData = cartStorage.load(currentUserId);
           
-          // If there's a guest cart to merge
+          // Process pending cart items from localStorage
+          const pendingItems = processPendingCartItems();
+          
+          // Merge all available carts: user cart + guest cart + pending items
+          let mergedItems = userCartData ? [...userCartData.items] : [];
+          let hasItemsToMerge = false;
+          
+          // Merge guest cart items
           if (guestCartData && guestCartData.items && guestCartData.items.length > 0) {
             console.log('Merging guest cart with user cart');
+            hasItemsToMerge = true;
             
-            // Start with user's cart or empty cart
-            let mergedItems = userCartData ? [...userCartData.items] : [];
-            
-            // Merge guest cart items
             guestCartData.items.forEach(guestItem => {
               const existingItemIndex = mergedItems.findIndex(
                 item => item.product._id === guestItem.product._id && item.size === guestItem.size
@@ -296,7 +330,29 @@ export const CartProvider = ({ children }) => {
                 mergedItems.push(guestItem);
               }
             });
+          }
+          
+          // Merge pending cart items
+          if (pendingItems && pendingItems.length > 0) {
+            console.log('Merging pending cart items with user cart');
+            hasItemsToMerge = true;
             
+            pendingItems.forEach(pendingItem => {
+              const existingItemIndex = mergedItems.findIndex(
+                item => item.product._id === pendingItem.product._id && item.size === pendingItem.size
+              );
+              
+              if (existingItemIndex >= 0) {
+                // Add quantities if item already exists
+                mergedItems[existingItemIndex].quantity += pendingItem.quantity;
+              } else {
+                // Add new item
+                mergedItems.push(pendingItem);
+              }
+            });
+          }
+          
+          if (hasItemsToMerge || userCartData) {
             // Calculate totals for merged cart
             const mergedTotal = mergedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
             const mergedItemCount = mergedItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -308,14 +364,12 @@ export const CartProvider = ({ children }) => {
             };
             
             dispatch({ type: 'LOAD_CART', payload: mergedCartData });
-            console.log('Guest cart merged successfully with user cart');
+            console.log('Cart merged successfully (user + guest + pending items)');
             
             // Clear guest cart after successful merge
-            cartStorage.clear(null);
-          } else if (userCartData) {
-            // No guest cart, just load user cart
-            dispatch({ type: 'LOAD_CART', payload: userCartData });
-            console.log('User cart loaded successfully from localStorage');
+            if (guestCartData) {
+              cartStorage.clear(null);
+            }
           } else {
             // No carts available, start fresh
             console.log('No cart data found, starting with empty cart');
