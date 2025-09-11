@@ -227,6 +227,98 @@ const MoMoReturn = () => {
                   {isSuccess ? 'Completed' : 'Failed'}
                 </Typography>
               </Box>
+
+              {/* Order Items */}
+              {paymentResult?.order?.items && paymentResult.order.items.length > 0 && (
+                <>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#8B4513', mt: 3, mb: 2 }}>
+                    Order Items
+                  </Typography>
+                  <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
+                    {paymentResult.order.items.map((item, index) => (
+                      <Box key={index} sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        py: 1,
+                        borderBottom: index < paymentResult.order.items.length - 1 ? '1px solid #eee' : 'none'
+                      }}>
+                        <Box>
+                          <Typography variant="body2" fontWeight="bold">
+                            {item.name} ({item.size || 'Regular'})
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {item.quantity} x {formatPrice(item.price || 0)}
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" fontWeight="bold">
+                          {formatPrice((item.price || 0) * (item.quantity || 0))}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </>
+              )}
+
+              {/* Customer Information */}
+              {paymentResult?.order && (
+                <>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#8B4513', mt: 3, mb: 2 }}>
+                    Customer Information
+                  </Typography>
+                  <Box sx={{ display: 'grid', gap: 1 }}>
+                    {paymentResult.order.orderType && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" color="text.secondary">Order Type:</Typography>
+                        <Typography variant="body2" fontWeight="bold">
+                          {paymentResult.order.orderType === 'delivery' ? 'Delivery' : 'Pickup'}
+                        </Typography>
+                      </Box>
+                    )}
+                    {paymentResult.order.deliveryAddress && (
+                      <>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2" color="text.secondary">Delivery Address:</Typography>
+                          <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
+                            {paymentResult.order.deliveryAddress.street}, {paymentResult.order.deliveryAddress.city} {paymentResult.order.deliveryAddress.zipCode}
+                          </Typography>
+                        </Box>
+                        {paymentResult.order.deliveryAddress.instructions && (
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2" color="text.secondary">Instructions:</Typography>
+                            <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
+                              {paymentResult.order.deliveryAddress.instructions}
+                            </Typography>
+                          </Box>
+                        )}
+                      </>
+                    )}
+                    {paymentResult.order.notes && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" color="text.secondary">Order Notes:</Typography>
+                        <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
+                          {paymentResult.order.notes}
+                        </Typography>
+                      </Box>
+                    )}
+                    {paymentResult.order.createdAt && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" color="text.secondary">Order Created:</Typography>
+                        <Typography variant="body2" fontWeight="bold">
+                          {new Date(paymentResult.order.createdAt).toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                          })}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </>
+              )}
             </Box>
           </CardContent>
         </Card>

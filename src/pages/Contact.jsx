@@ -657,66 +657,41 @@ const Contact = () => {
   return (
     <Box>
       {/* Removed Helmet component due to react-helmet-async dependency conflicts */}
-      {/* Quick Action Bar */}
-      <Paper 
-        sx={{ 
-          position: 'sticky', 
-          top: 0, 
-          zIndex: 1000, 
-          backgroundColor: '#8B4513',
-          color: 'white',
-          py: 1
+      {/* Urgent Banner */}
+      <Alert
+        severity="warning"
+        sx={{
+          mb: 0,
+          borderRadius: 0,
+          display: "flex",
+          justifyContent: "center", // Căn giữa theo chiều ngang
+          alignItems: "center",     // Căn giữa theo chiều dọc
+          py: 1,                    // Padding dọc
         }}
       >
-        <Container>
-          <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, flexWrap: 'wrap' }}>
-            <Button
-              startIcon={<Phone />}
-              href="tel:+842812345678"
-              sx={{ color: 'white', textTransform: 'none' }}
-              size="small"
-            >
-              Call Now
-            </Button>
-            <Button
-              startIcon={<WhatsApp />}
-              href="https://wa.me/842812345678"
-              target="_blank"
-              sx={{ color: 'white', textTransform: 'none' }}
-              size="small"
-            >
-              WhatsApp
-            </Button>
-
-            <Button
-              startIcon={<Search />}
-              onClick={() => setTrackOrderDialog(true)}
-              sx={{ color: 'white', textTransform: 'none' }}
-              size="small"
-            >
-              Track Order
-            </Button>
-          </Box>
-        </Container>
-      </Paper>
-
-      {/* Urgent Banner */}
-      <Alert 
-        severity="warning" 
-        sx={{ mb: 0, borderRadius: 0 }}
-        action={
-          <Button 
-            color="inherit" 
-            size="small" 
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,                 // Khoảng cách giữa chữ và nút
+          }}
+        >
+          <strong>Vấn đề đơn hàng khẩn cấp?</strong>
+          <Button
+            color="inherit"
+            size="small"
             href="tel:+842812345678"
             startIcon={<Phone />}
+            sx={{
+              fontWeight: "bold",
+              textTransform: "uppercase",
+            }}
           >
             Call Now
           </Button>
-        }
-      >
-        <strong>Urgent order issue?</strong> Call our hotline for immediate help.
+        </Box>
       </Alert>
+
 
       {/* Hero Section */}
       <Box 
@@ -815,7 +790,7 @@ const Contact = () => {
                   Gọi Cho Chúng Tôi
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  +84 28 1234 5678
+                  0837055076
                 </Typography>
               </Card>
             </Grid>
@@ -844,7 +819,7 @@ const Contact = () => {
                   Gửi Email
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  hello@dreamcoffee.com
+                  dreamcoffee@gmail.com
                 </Typography>
               </Card>
             </Grid>
@@ -873,7 +848,7 @@ const Contact = () => {
                   Ghé Thăm
                 </Typography>
                 <Typography variant="body2" sx={{ color: 'rgba(255,255,255,0.8)' }}>
-                  123 Đường Cà Phê, Quận 1
+                  97 Man Thiện, Hiệp Phú, Thủ Đức, Hồ Chí Minh
                 </Typography>
               </Card>
             </Grid>

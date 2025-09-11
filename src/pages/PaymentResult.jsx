@@ -70,16 +70,20 @@ export default function PaymentResult() {
     if (finalOrderId && isAuthenticated) {
       // Fetch order details to verify payment status from backend
       fetchOrderStatus(finalOrderId);
+    } else if (!finalOrderId) {
+      // If no order ID is provided, set status to fail
+      setStatus('fail');
     }
   }, [location, isAuthenticated]);
 
   const fetchOrderStatus = async (orderId) => {
     try {
-      // Wait a moment for IPN to process
+      // Wait a moment for payment processing to complete
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       const token = localStorage.getItem('token');
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/payments/vnpay/status/${orderId}`, {
+      // Use the general orders endpoint to get order details
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/orders`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -89,23 +93,32 @@ export default function PaymentResult() {
 
       if (response.ok) {
         const data = await response.json();
-        if (data.success) {
-          setOrderDetails(data.data);
-          // Set status based on backend verification, not frontend params
-          if (data.data.paymentStatus === 'paid') {
-            setStatus('success');
+        if (data.success && data.data) {
+          // Find the specific order by orderNumber
+          const order = data.data.find(o => o.orderNumber === orderId);
+          if (order) {
+            setOrderDetails(order);
+            // Set status based on backend verification, not frontend params
+            if (order.paymentStatus === 'paid') {
+              setStatus('success');
+            } else {
+              setStatus('fail');
+            }
           } else {
-            setStatus('fail');
+            console.warn('Order not found:', orderId);
+            // Keep the status from URL params if order not found
           }
         } else {
-          setStatus('fail');
+          console.warn('Failed to fetch orders:', data.message);
+          // Keep the status from URL params if API call fails
         }
       } else {
-        setStatus('fail');
+        console.warn('Orders API call failed:', response.status);
+        // Keep the status from URL params if API call fails
       }
     } catch (error) {
       console.error('Failed to fetch order status:', error);
-      setStatus('fail');
+      // Keep the status from URL params if there's an error
     }
   };
 
@@ -210,7 +223,22 @@ export default function PaymentResult() {
                 {paymentInfo.payDate && (
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                     <Typography variant="body2" color="text.secondary">Payment Date:</Typography>
-                    <Typography variant="body2" fontWeight="bold">{paymentInfo.payDate}</Typography>
+                    <Typography variant="body2" fontWeight="bold">
+                      {(() => {
+                        // Format VNPay date (YYYYMMDDHHMMSS) to readable format
+                        const dateStr = paymentInfo.payDate;
+                        if (dateStr && dateStr.length === 14) {
+                          const year = dateStr.substring(0, 4);
+                          const month = dateStr.substring(4, 6);
+                          const day = dateStr.substring(6, 8);
+                          const hour = dateStr.substring(8, 10);
+                          const minute = dateStr.substring(10, 12);
+                          const second = dateStr.substring(12, 14);
+                          return `${day}/${month}/${year} ${hour}:${minute}:${second}`;
+                        }
+                        return dateStr;
+                      })()} 
+                    </Typography>
                   </Box>
                 )}
                 {orderDetails && (
@@ -227,7 +255,9 @@ export default function PaymentResult() {
                     </Box>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                       <Typography variant="body2" color="text.secondary">Payment Method:</Typography>
-                      <Typography variant="body2" fontWeight="bold">{orderDetails.paymentMethod || 'VNPay'}</Typography>
+                      <Typography variant="body2" fontWeight="bold">
+                        {orderDetails.paymentDetails?.method || orderDetails.paymentMethod || 'VNPay'}
+                      </Typography>
                     </Box>
                     {orderDetails.paymentDetails?.paidAt && (
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -240,6 +270,98 @@ export default function PaymentResult() {
                   </>
                 )}
               </Box>
+
+              {/* Order Items */}
+              {orderDetails && orderDetails.items && orderDetails.items.length > 0 && (
+                <>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#8B4513', mt: 3, mb: 2 }}>
+                    Order Items
+                  </Typography>
+                  <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
+                    {orderDetails.items.map((item, index) => (
+                      <Box key={index} sx={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        py: 1,
+                        borderBottom: index < orderDetails.items.length - 1 ? '1px solid #eee' : 'none'
+                      }}>
+                        <Box>
+                          <Typography variant="body2" fontWeight="bold">
+                            {item.name} ({item.size || 'Regular'})
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {item.quantity} x {formatPrice(item.price)}
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" fontWeight="bold">
+                          {formatPrice(item.price * item.quantity)}
+                        </Typography>
+                      </Box>
+                    ))}
+                  </Box>
+                </>
+              )}
+
+              {/* Customer Information */}
+              {orderDetails && (
+                <>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#8B4513', mt: 3, mb: 2 }}>
+                    Customer Information
+                  </Typography>
+                  <Box sx={{ display: 'grid', gap: 1 }}>
+                    {orderDetails.orderType && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" color="text.secondary">Order Type:</Typography>
+                        <Typography variant="body2" fontWeight="bold">
+                          {orderDetails.orderType === 'delivery' ? 'Delivery' : 'Pickup'}
+                        </Typography>
+                      </Box>
+                    )}
+                    {orderDetails.deliveryAddress && (
+                      <>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <Typography variant="body2" color="text.secondary">Delivery Address:</Typography>
+                          <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
+                            {orderDetails.deliveryAddress.street}, {orderDetails.deliveryAddress.city} {orderDetails.deliveryAddress.zipCode}
+                          </Typography>
+                        </Box>
+                        {orderDetails.deliveryAddress.instructions && (
+                          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                            <Typography variant="body2" color="text.secondary">Instructions:</Typography>
+                            <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
+                              {orderDetails.deliveryAddress.instructions}
+                            </Typography>
+                          </Box>
+                        )}
+                      </>
+                    )}
+                    {orderDetails.notes && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" color="text.secondary">Order Notes:</Typography>
+                        <Typography variant="body2" fontWeight="bold" sx={{ textAlign: 'right', maxWidth: '60%' }}>
+                          {orderDetails.notes}
+                        </Typography>
+                      </Box>
+                    )}
+                    {orderDetails.createdAt && (
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Typography variant="body2" color="text.secondary">Order Created:</Typography>
+                        <Typography variant="body2" fontWeight="bold">
+                          {new Date(orderDetails.createdAt).toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            second: '2-digit'
+                          })}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
+                </>
+              )}
             </CardContent>
           </Card>
         )}

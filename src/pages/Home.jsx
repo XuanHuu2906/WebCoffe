@@ -18,7 +18,7 @@ import {
   Chip
 } from '@mui/material';
 import { Add, Remove } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import ImageCarousel from '../components/ImageCarousel';
 import { useProducts } from '../contexts/ProductContext';
 import { useCart } from '../contexts/CartContext';
@@ -27,6 +27,7 @@ import { formatPrice } from '../utils/formatPrice';
 
 const Home = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { fetchFeaturedProducts } = useProducts();
   const { addToCart, getItemQuantity, updateQuantity } = useCart();
   const { isAuthenticated } = useAuth();
@@ -34,6 +35,7 @@ const Home = () => {
   const [featuredLoading, setFeaturedLoading] = useState(true);
   const [featuredError, setFeaturedError] = useState(null);
   const [selectedSize, setSelectedSize] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
 
 
   const heroImages = [
@@ -56,19 +58,48 @@ const Home = () => {
 
   // Add item to cart
   const handleAddToCart = (product) => {
+    const size = selectedSize[product._id];
+    
     // Check if user is authenticated
     if (!isAuthenticated) {
-      // Redirect to login page
+      // Store pending cart item in localStorage
+      const pendingItem = {
+        product,
+        quantity: 1,
+        size: size || 'Regular',
+        timestamp: Date.now()
+      };
+      
+      // Get existing pending items
+      const existingPending = JSON.parse(localStorage.getItem('pendingCartItems') || '[]');
+      
+      // Check if item already exists in pending cart
+      const existingIndex = existingPending.findIndex(
+        item => item.product._id === product._id && item.size === (size || 'Regular')
+      );
+      
+      if (existingIndex >= 0) {
+        // Update quantity if item exists
+        existingPending[existingIndex].quantity += 1;
+        existingPending[existingIndex].timestamp = Date.now();
+      } else {
+        // Add new item to pending cart
+        existingPending.push(pendingItem);
+      }
+      
+      // Save updated pending cart
+      localStorage.setItem('pendingCartItems', JSON.stringify(existingPending));
+      
+      // Redirect to login page with message
       navigate('/login', { 
         state: { 
           from: '/',
-          message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng'
+          message: 'Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng. Sản phẩm sẽ được tự động thêm vào giỏ hàng sau khi đăng nhập.'
         }
       });
       return;
     }
     
-    const size = selectedSize[product._id];
     addToCart(product, 1, size);
   };
 
@@ -113,6 +144,18 @@ const Home = () => {
 
     loadFeaturedProducts();
   }, [fetchFeaturedProducts]);
+
+  // Handle success message from navigation state
+  useEffect(() => {
+    if (location.state?.message && location.state?.type === 'success') {
+      setSuccessMessage(location.state.message);
+      // Clear the message after 5 seconds
+      const timer = setTimeout(() => {
+        setSuccessMessage('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [location.state]);
 
   return (
     <Box>
@@ -228,6 +271,18 @@ const Home = () => {
           >
             Best Seller
           </Typography>
+          
+          {/* Success Message */}
+          {successMessage && (
+            <Alert 
+              severity="success" 
+              sx={{ mb: 3 }}
+              onClose={() => setSuccessMessage('')}
+            >
+              {successMessage}
+            </Alert>
+          )}
+          
           {featuredLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
               <CircularProgress size={60} sx={{ color: '#8B4513' }} />

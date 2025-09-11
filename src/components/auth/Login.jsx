@@ -103,9 +103,26 @@ const Login = () => {
     const result = await login(formData.email, formData.password);
     
     if (result.success) {
+      // Check if there were pending cart items
+      const hadPendingItems = localStorage.getItem('pendingCartItems');
+      
       // Redirect to the page user came from, or home page
       const redirectTo = location.state?.from || '/';
-      navigate(redirectTo);
+      
+      // Add a small delay to allow cart context to process pending items
+      setTimeout(() => {
+        if (hadPendingItems) {
+          // Navigate with success message about auto-added items
+          navigate(redirectTo, {
+            state: {
+              message: 'Đăng nhập thành công! Các sản phẩm đã được tự động thêm vào giỏ hàng.',
+              type: 'success'
+            }
+          });
+        } else {
+          navigate(redirectTo);
+        }
+      }, 100);
     }
   };
 
