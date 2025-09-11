@@ -39,9 +39,9 @@ const Home = () => {
 
 
   const heroImages = [
-    '/images/z6963357928838_e8b0a328ad2578452e17e1391b53136d.jpg',
-    '/images/z6963358140668_494344e82b188f66d5bbe377d74c51d4.jpg',
-    '/images/z6963358395455_d42047d065013cc1676c097d22048bc0.jpg'
+    '/images/1.png',
+    '/images/2.png',
+    '/images/3.png'
   ];
 
   const interiorImages = [
